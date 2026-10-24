@@ -1,0 +1,320 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>ARCHFORM Studio</title>
+<style>
+:root{color-scheme:dark;--bg:#09101d;--panel:#111d30;--line:#283b53;--text:#e8f2ff;--muted:#91a6bf;--accent:#55d6be;--blue:#78a9ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px system-ui,Arial}
+header{height:62px;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#101a2b;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:4}
+.brand{font-size:22px;font-weight:900;letter-spacing:1px}.brand span{color:var(--accent)}
+small,.muted{color:var(--muted)}
+button,input,select{font:inherit}
+button{border:1px solid var(--line);background:#1b2b42;color:var(--text);padding:9px 11px;border-radius:8px;cursor:pointer}
+button:active{opacity:.75}
+.primary,.active{background:var(--accent);color:#061c1a;border-color:var(--accent);font-weight:700}
+.layout{display:grid;grid-template-columns:220px minmax(0,1fr) 230px;min-height:calc(100vh - 62px)}
+aside{background:#0f1929;padding:12px;min-width:0}
+.left{border-right:1px solid var(--line)}.right{border-left:1px solid var(--line)}
+main{padding:12px;min-width:0}
+h2{font-size:16px;margin:5px 0 12px}h3{font-size:11px;letter-spacing:1px;color:var(--muted);margin:17px 0 9px;text-transform:uppercase}
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.tools button{text-align:left;min-height:45px}
+.field{display:flex;flex-direction:column;gap:5px;margin:9px 0}
+label{font-size:12px;color:var(--muted)}
+input,select{width:100%;min-width:0;background:#091323;color:var(--text);border:1px solid var(--line);border-radius:7px;padding:9px}
+.row{display:flex;gap:8px}.row>*{flex:1;min-width:0}
+.toolbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
+.board{height:min(64vh,720px);min-height:330px;position:relative;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#08111e}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+.hint{position:absolute;bottom:8px;left:8px;background:#101b2be8;border:1px solid var(--line);border-radius:6px;padding:7px;font-size:11px;color:var(--muted);pointer-events:none}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:9px}
+.stat,.box{padding:11px;border:1px solid var(--line);border-radius:9px;background:var(--panel);margin:8px 0}
+.stat strong{display:block;font-size:18px;margin-top:5px;overflow-wrap:anywhere}
+.full{width:100%;margin:4px 0}
+.item{padding:9px;border:1px solid var(--line);border-radius:7px;margin:6px 0;cursor:pointer;overflow-wrap:anywhere}
+.item.selected{border-color:var(--accent)}
+.notice{font-size:12px;color:var(--accent);min-height:18px;margin:8px 0}
+table{width:100%;border-collapse:collapse;font-size:12px}
+td,th{padding:8px 4px;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--muted)}
+.warning{font-size:12px;color:#e6ce93;line-height:1.6}
+@media(max-width:850px){.layout{grid-template-columns:180px minmax(0,1fr)}.right{grid-column:1/-1;border:0;border-top:1px solid var(--line)}}
+@media(max-width:560px){.layout{display:flex;flex-direction:column}.left,.right{border:0;border-bottom:1px solid var(--line)}.left .tools{grid-template-columns:repeat(3,1fr)}.left .tools button{text-align:center;padding:8px 3px;font-size:12px}.board{height:48vh;min-height:300px}.toolbar button{font-size:12px;padding:8px}.stats .stat{padding:8px}.stat strong{font-size:15px}main{padding:8px}.projectgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.projectgrid .field{margin:3px 0}}
+</style>
+</head>
+<body>
+<header>
+ <div><div class="brand">ARCH<span>FORM</span></div><small>Architectural Design Studio</small></div>
+ <button class="primary" id="save">Save</button>
+</header>
+
+<div class="layout">
+<aside class="left">
+ <h3>Drafting tools</h3>
+ <div class="tools">
+  <button class="active" data-tool="select">↖ Select</button>
+  <button data-tool="room">□ Room</button>
+  <button data-tool="wall">╱ Wall</button>
+  <button data-tool="door">▯ Door</button>
+  <button data-tool="window">▤ Window</button>
+  <button data-tool="erase">⌫ Erase</button>
+ </div>
+
+ <h3>Project</h3>
+ <div class="projectgrid">
+  <div class="field"><label>Project name</label><input id="project" value="My House"></div>
+  <div class="field"><label>Units</label><select id="units"><option value="m">Meters</option><option value="ft">Feet</option></select></div>
+  <div class="field"><label>Plot width (m)</label><input id="plotW" type="number" min="2" value="12"></div>
+  <div class="field"><label>Plot depth (m)</label><input id="plotD" type="number" min="2" value="18"></div>
+ </div>
+
+ <h3>Site & setbacks</h3>
+ <div class="field"><label>North direction</label><select id="north"><option value="N">Top — North</option><option value="E">Right — North</option><option value="S">Bottom — North</option><option value="W">Left — North</option></select></div>
+ <div class="field"><label>Road side</label><select id="road"><option>North</option><option>South</option><option>East</option><option>West</option></select></div>
+ <div class="row">
+  <div class="field"><label>Front (m)</label><input id="front" type="number" min="0" value="1.5" step=".1"></div>
+  <div class="field"><label>Rear (m)</label><input id="rear" type="number" min="0" value="1" step=".1"></div>
+ </div>
+ <div class="row">
+  <div class="field"><label>Left (m)</label><input id="leftSet" type="number" min="0" value="1" step=".1"></div>
+  <div class="field"><label>Right (m)</label><input id="rightSet" type="number" min="0" value="1" step=".1"></div>
+ </div>
+ <button class="full" id="gps">Get GPS location</button>
+ <div class="muted" id="gpsText">Location is optional.</div>
+</aside>
+
+<main>
+ <div class="toolbar">
+  <button id="undo">Undo</button><button id="grid" class="active">Grid</button>
+  <button id="site" class="active">Site</button><button id="zoomOut">−</button>
+  <button id="zoomIn">+</button><button id="exportSvg">Export SVG</button>
+  <button id="exportJson">Export JSON</button><button id="print">Print / PDF</button>
+  <button id="load">Open project</button>
+  <input type="file" id="file" accept=".json,application/json" hidden>
+ </div>
+
+ <div class="board">
+  <canvas id="canvas"></canvas>
+  <div class="hint" id="hint">Choose Room and drag on the drawing canvas.</div>
+ </div>
+ <div class="stats">
+  <div class="stat"><small>Rooms</small><strong id="count">0</strong></div>
+  <div class="stat"><small>Floor area</small><strong id="area">0 m²</strong></div>
+  <div class="stat"><small>Plot area</small><strong id="plotArea">216 m²</strong></div>
+ </div>
+ <div class="notice" id="notice">Ready. Draw a room to begin.</div>
+ <h3>Drawing information</h3>
+ <div class="muted">Room sizes use the canvas scale. Drag from one corner to another to draw. Tap an item with Select to edit it. Grid snapping is enabled for new drawings.</div>
+</main>
+
+<aside class="right">
+ <h2>Properties</h2>
+ <div id="empty" class="muted">Select a room or drawing element.</div>
+ <div id="editor" hidden>
+  <div class="field"><label>Name</label><input id="name"></div>
+  <div class="row">
+   <div class="field"><label>Width (m)</label><input id="width" type="number" min=".2" step=".1"></div>
+   <div class="field"><label>Depth (m)</label><input id="depth" type="number" min=".2" step=".1"></div>
+  </div>
+  <button class="primary full" id="apply">Apply dimensions</button>
+  <button class="full" id="remove">Delete item</button>
+ </div>
+ <h3>Room schedule</h3><div id="roomList" class="muted">No rooms yet.</div>
+ <h3>BOQ estimator</h3>
+ <div class="field"><label>Wall height (m)</label><input id="wallHeight" type="number" min="1" max="20" value="3" step=".1"></div>
+ <div class="field"><label>Wall thickness (m)</label><input id="thickness" type="number" min=".05" max="1" value=".15" step=".01"></div>
+ <div class="field"><label>Indicative cost per m² (₹)</label><input id="rate" type="number" min="0" value="1800"></div>
+ <div class="box" id="boq">Draw rooms to estimate quantities.</div>
+ <h3>Vastu hints</h3>
+ <div class="box muted" id="vastu">Add rooms to view optional traditional layout hints.</div>
+ <h3>Elevation preview</h3>
+ <button class="full" id="elevation">Generate simple elevation</button>
+ <div id="elevationView" class="box muted">A schematic front elevation can be generated from the room layout.</div>
+ <h3>Important</h3>
+ <p class="warning">Setback checks and BOQ are preliminary estimates only. They do not certify local building-code compliance or structural safety. Obtain approval from qualified local professionals.</p>
+</aside>
+</div>
+
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id);
+const canvas=$("canvas"),ctx=canvas.getContext("2d");
+let items=[],selected=null,tool="select",showGrid=true,showSite=true,zoom=1,drag=null,history=[],scale=30,offsetX=0,offsetY=0, gpsCoords=null;
+const colors={room:"#55d6be",wall:"#78a9ff",door:"#f2c879",window:"#c5a6ff"};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function val(id,fallback=0){let n=Number($(id).value);return Number.isFinite(n)?n:fallback}
+function msg(t){$("notice").textContent=t}
+function saveHistory(){history.push(JSON.stringify(items));if(history.length>40)history.shift()}
+function dimensions(it){return {w:Math.abs(it.x2-it.x1)/scale,h:Math.abs(it.y2-it.y1)/scale}}
+function rect(it){return {x:Math.min(it.x1,it.x2),y:Math.min(it.y1,it.y2),w:Math.abs(it.x2-it.x1),h:Math.abs(it.y2-it.y1)}}
+function area(it){let d=dimensions(it);return d.w*d.h}
+function fmt(n){return n.toLocaleString("en-IN",{maximumFractionDigits:2})}
+function setTool(t){
+ tool=t;document.querySelectorAll("[data-tool]").forEach(b=>b.classList.toggle("active",b.dataset.tool===t));
+ const hints={select:"Tap an element to select it.",room:"Drag to draw a room.",wall:"Drag to draw a wall.",door:"Tap to place a door symbol.",window:"Tap to place a window symbol.",erase:"Tap an element to delete it."};
+ $("hint").textContent=hints[t]||"";
+}
+document.querySelectorAll("[data-tool]").forEach(b=>b.onclick=()=>setTool(b.dataset.tool));
+function fit(){
+ let r=canvas.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);
+ canvas.width=Math.max(1,Math.round(r.width*dpr));canvas.height=Math.max(1,Math.round(r.height*dpr));
+ ctx.setTransform(dpr,0,0,dpr,0,0);draw();
+}
+function projectBox(){
+ let w=val("plotW",12),h=val("plotD",18);
+ if(w<=0||h<=0)return null;
+ const cw=canvas.clientWidth,ch=canvas.clientHeight;
+ let s=Math.min((cw-55)/w,(ch-55)/h)*zoom;
+ return {s,x:(cw-w*s)/2,y:(ch-h*s)/2,w,h};
+}
+function draw(){
+ const cw=canvas.clientWidth,ch=canvas.clientHeight;
+ ctx.clearRect(0,0,cw,ch);ctx.fillStyle="#08111e";ctx.fillRect(0,0,cw,ch);
+ let p=projectBox();
+ if(!p){return}
+ scale=p.s;
+ if(showGrid){
+  ctx.strokeStyle="#182940";ctx.lineWidth=1;ctx.beginPath();
+  let step=Math.max(8,scale/2);
+  for(let x=p.x%step;x<cw;x+=step){ctx.moveTo(x,0);ctx.lineTo(x,ch)}
+  for(let y=p.y%step;y<ch;y+=step){ctx.moveTo(0,y);ctx.lineTo(cw,y)}
+  ctx.stroke();
+ }
+ if(showSite){
+  ctx.strokeStyle="#91a6bf";ctx.lineWidth=1.5;ctx.strokeRect(p.x,p.y,p.w*scale,p.h*scale);
+  let front=val("front",0),rear=val("rear",0),left=val("leftSet",0),right=val("rightSet",0);
+  let x=p.x+left*scale,y=p.y+rear*scale,w=(p.w-left-right)*scale,h=(p.h-front-rear)*scale;
+  if(w>0&&h>0){ctx.setLineDash([5,4]);ctx.strokeStyle="#d5b878";ctx.strokeRect(x,y,w,h);ctx.setLineDash([])}
+  ctx.fillStyle="#91a6bf";ctx.font="11px system-ui";ctx.fillText("N ↑",p.x+5,p.y-8);
+  ctx.fillText(`${fmt(p.w)} × ${fmt(p.h)} m`,p.x+4,p.y+p.h*scale+15);
+ }
+ for(const it of items)drawItem(it,it===selected);
+ if(drag&&drag.preview){
+  drawItem({...drag.preview},false,true);
+ }
+ updateStats();
+}
+function drawItem(it,isSelected,preview=false){
+ const c=colors[it.type]||"#55d6be";ctx.strokeStyle=c;ctx.fillStyle=c;ctx.lineWidth=isSelected?3:2;
+ if(it.type==="room"){
+  let r=rect(it);ctx.globalAlpha=preview?.5:.12;ctx.fillRect(r.x,r.y,r.w,r.h);ctx.globalAlpha=1;
+  ctx.strokeRect(r.x,r.y,r.w,r.h);
+  if(r.w>38&&r.h>22){ctx.font="12px system-ui";ctx.textAlign="center";ctx.fillStyle=c;ctx.fillText(it.name||"Room",r.x+r.w/2,r.y+r.h/2-3);ctx.font="11px system-ui";ctx.fillText(`${fmt(r.w/scale)} × ${fmt(r.h/scale)} m`,r.x+r.w/2,r.y+r.h/2+13)}
+ }else if(it.type==="wall"){
+  ctx.beginPath();ctx.moveTo(it.x1,it.y1);ctx.lineTo(it.x2,it.y2);ctx.stroke();
+ }else{
+  let x=it.x1,y=it.y1;
+  ctx.fillStyle="#08111e";ctx.fillRect(x-10,y-4,20,8);
+  ctx.strokeStyle=c;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x-10,y);ctx.lineTo(x+10,y);ctx.stroke();
+  if(it.type==="door"){ctx.lineWidth=1;ctx.beginPath();ctx.arc(x-10,y,20,0,Math.PI/2);ctx.stroke()}
+ }
+ if(isSelected){let r=rect(it);ctx.strokeStyle="#fff";ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.strokeRect(r.x-4,r.y-4,Math.max(8,r.w+8),Math.max(8,r.h+8));ctx.setLineDash([])}
+}
+function pointer(e){
+ let r=canvas.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top};
+}
+function snap(v){return showGrid?Math.round(v/Math.max(5,scale/2))*Math.max(5,scale/2):v}
+function nearest(pt){
+ let best=null,dist=20;
+ for(let i=items.length-1;i>=0;i--){
+  let it=items[i],r=rect(it);
+  let d=it.type==="wall"?Math.abs((pt.x-it.x1)*(it.y2-it.y1)-(pt.y-it.y1)*(it.x2-it.x1))/Math.max(1,Math.hypot(it.x2-it.x1,it.y2-it.y1)):
+  Math.max(r.x-pt.x,0,pt.x-(r.x+r.w),r.y-pt.y,0,pt.y-(r.y+r.h));
+  if(d<dist){best=it;dist=d}
+ }
+ return best;
+}
+canvas.addEventListener("pointerdown",e=>{
+ let pt=pointer(e);
+ if(tool==="select"){
+  selected=nearest(pt);updateEditor();draw();return;
+ }
+ if(tool==="erase"){
+  let it=nearest(pt);if(it){saveHistory();items=items.filter(x=>x!==it);if(selected===it)selected=null;updateEditor();draw();msg("Element deleted.")}return;
+ }
+ if(tool==="door"||tool==="window"){
+  saveHistory();items.push({id:Date.now()+Math.random(),type:tool,name:tool==="door"?"Door":"Window",x1:snap(pt.x),y1:snap(pt.y),x2:snap(pt.x),y2:snap(pt.y)});selected=items.at(-1);updateEditor();draw();return;
+ }
+ drag={start:{x:snap(pt.x),y:snap(pt.y)},preview:{type:tool,name:tool==="room"?"Room":"Wall",x1:snap(pt.x),y1:snap(pt.y),x2:snap(pt.x),y2:snap(pt.y)}};
+ canvas.setPointerCapture(e.pointerId);draw();
+});
+canvas.addEventListener("pointermove",e=>{
+ if(!drag)return;let pt=pointer(e);
+ drag.preview.x2=snap(pt.x);drag.preview.y2=snap(pt.y);draw();
+});
+canvas.addEventListener("pointerup",()=>{
+ if(!drag)return;
+ let it=drag.preview;drag=null;
+ if(Math.hypot(it.x2-it.x1,it.y2-it.y1)<12){draw();return}
+ saveHistory();it.id=Date.now()+Math.random();items.push(it);selected=it;updateEditor();draw();msg("Element added.");
+});
+function updateEditor(){
+ $("empty").hidden=!!selected;$("editor").hidden=!selected;
+ if(!selected)return;
+ $("name").value=selected.name||selected.type;
+ let d=dimensions(selected);$("width").value=fmt(d.w);$("depth").value=fmt(d.h);
+}
+$("apply").onclick=()=>{
+ if(!selected)return;
+ let w=val("width",1),h=val("depth",1);
+ if(w<=0||h<=0){msg("Dimensions must be positive.");return}
+ saveHistory();selected.name=$("name").value||selected.type;
+ let x=selected.x1,y=selected.y1;
+ selected.x2=x+w*scale;selected.y2=y+h*scale;
+ updateEditor();draw();msg("Dimensions updated.");
+};
+$("remove").onclick=()=>{if(!selected)return;saveHistory();items=items.filter(i=>i!==selected);selected=null;updateEditor();draw();msg("Deleted.")};
+$("undo").onclick=()=>{if(history.length){items=JSON.parse(history.pop());selected=null;updateEditor();draw();msg("Undo complete.")}else msg("Nothing to undo.")};
+$("clear").onclick=()=>{saveHistory();items=[];selected=null;updateEditor();draw()};
+$("grid").onclick=()=>{showGrid=!showGrid;$("grid").classList.toggle("active",showGrid);draw()};
+$("site").onclick=()=>{showSite=!showSite;$("site").classList.toggle("active",showSite);draw()};
+$("zoomIn").onclick=()=>{zoom=Math.min(zoom*1.2,4);draw()};
+$("zoomOut").onclick=()=>{zoom=Math.max(zoom/1.2,.4);draw()};
+["plotW","plotD","front","rear","leftSet","rightSet","north","road","units","wallHeight","thickness","rate"].forEach(id=>$(id).addEventListener("change",()=>{draw();updateBOQ();updateVastu()}));
+function updateStats(){
+ let rooms=items.filter(i=>i.type==="room"),total=rooms.reduce((s,i)=>s+area(i),0);
+ let u=$("units").value==="ft"?10.7639:1,suffix=$("units").value==="ft"?"ft²":"m²";
+ $("count").textContent=rooms.length;$("area").textContent=fmt(total*u)+" "+suffix;
+ $("plotArea").textContent=fmt(val("plotW",12)*val("plotD",18)*u)+" "+suffix;
+ $("roomList").innerHTML=rooms.length?rooms.map((r,i)=>`<div class="item ${r===selected?"selected":""}" data-id="${r.id}">${i+1}. ${esc(r.name||"Room")}<br><small>${fmt(dimensions(r).w)} × ${fmt(dimensions(r).h)} m · ${fmt(area(r))} m²</small></div>`).join(""):"No rooms yet.";
+ $("roomList").querySelectorAll("[data-id]").forEach(el=>el.onclick=()=>{selected=items.find(i=>String(i.id)===el.dataset.id);updateEditor();draw()});
+ updateBOQ();updateVastu();
+}
+function updateBOQ(){
+ let rooms=items.filter(i=>i.type==="room"),perimeter=rooms.reduce((s,i)=>{let d=dimensions(i);return s+2*(d.w+d.h)},0);
+ let height=Math.max(0,val("wallHeight",3)),thick=Math.max(0,val("thickness",.15));
+ let wallArea=perimeter*height,brick=wallArea*thick,concrete=rooms.reduce((s,i)=>s+area(i)*.1,0);
+ let flooring=rooms.reduce((s,i)=>s+area(i),0),rate=Math.max(0,val("rate",1800));
+ $("boq").innerHTML=`<table><tr><th>Item</th><th>Estimated quantity</th></tr><tr><td>Flooring</td><td>${fmt(flooring)} m²</td></tr><tr><td>Wall surface</td><td>${fmt(wallArea)} m²</td></tr><tr><td>Wall volume</td><td>${fmt(brick)} m³</td></tr><tr><td>Illustrative slab volume</td><td>${fmt(concrete)} m³</td></tr></table><p>Rough area-based cost: <b>₹${fmt(flooring*rate)}</b></p><small>Overlapping room walls may be counted twice. Not a construction-ready BOQ.</small>`;
+}
+function updateVastu(){
+ let rooms=items.filter(i=>i.type==="room");
+ if(!rooms.length){$("vastu").textContent="Add rooms to view optional traditional layout hints.";return}
+ let north=$("north").value;
+ $("vastu").innerHTML=`North is shown toward <b>${north}</b>. Traditional Vastu guidelines often associate the northeast with prayer/water areas and the southeast with fire/cooking. Room suitability depends on the actual site orientation and plan. These are cultural planning hints, not scientific or code-compliance checks.`;
+}
+$("save").onclick=()=>{
+ try{localStorage.setItem("archform_project_v1",JSON.stringify(projectData()));msg("Project saved on this device.");}
+ catch(e){msg("Could not save locally. Use Export JSON instead.")}
+};
+function projectData(){return {app:"ARCHFORM",version:1,project:$("project").value,units:$("units").value,plot:{width:val("plotW",12),depth:val("plotD",18),north:$("north").value,road:$("road").value,setbacks:{front:val("front"),rear:val("rear"),left:val("leftSet"),right:val("rightSet")}},items,settings:{wallHeight:val("wallHeight",3),thickness:val("thickness",.15),rate:val("rate",1800)}}}
+function download(name,data,type){
+ let blob=new Blob([data],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+$("exportJson").onclick=()=>download("archform-project.json",JSON.stringify(projectData(),null,2),"application/json");
+$("load").onclick=()=>$("file").click();
+$("file").onchange=async e=>{
+ let f=e.target.files[0];if(!f)return;
+ try{
+  let d=JSON.parse(await f.text());if(!Array.isArray(d.items))throw Error("Invalid project");
+  saveHistory();items=d.items;selected=null;
+  if(d.project)$("project").value=d.project;
+  if(d.units)$("units").value=d.units;
+  if(d.plot){$("plotW").value=d.plot.width;$("plotD").value=d.plot.depth;$("north").value=d.plot.north;$("road").value=d.plot.road;
+   if(d.plot.setbacks){$("front").value=d.plot.setbacks.front;$("rear").value=d.plot.setbacks.rear;$("leftSet").value=d.plot.setbacks.left;$("rightSet").value=d.plot.s
