@@ -131,7 +131,7 @@ td input{width:85px;background:#0a1223;color:var(--txt);border:1px solid var(--l
        <!-- Populated with 160+ world currencies -->
      </select>
    </div>
-   <button class="gis" id="openBoqMap">🗺️ High-Accuracy Supplier Map</button>
+   <button class="gis" id="openBoqMap">🗺️ Supplier Map</button>
    <button id="save">Save JSON</button>
    <button id="open">Open JSON</button>
    <input id="file" type="file" accept=".json,application/json" style="display:none">
@@ -258,7 +258,7 @@ td input{width:85px;background:#0a1223;color:var(--txt);border:1px solid var(--l
             <th>Quantity</th>
             <th id="rateHeader">Rate</th>
             <th>Amount</th>
-            <th>Sourcing Desk</th>
+            <th>Online Sourcing</th>
           </tr>
         </thead>
         <tbody id="boq"></tbody>
@@ -267,7 +267,7 @@ td input{width:85px;background:#0a1223;color:var(--txt);border:1px solid var(--l
 
     <div id="vendorBox" class="vendor-info-box">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-        <strong id="vendorTitle" style="color:var(--cyan); font-size:13px;">Country-Verified Retailers & Suppliers</strong>
+        <strong id="vendorTitle" style="color:var(--cyan); font-size:13px;">Country-Verified Suppliers</strong>
         <button onclick="closeVendorBox()" class="small">✕</button>
       </div>
       <div id="vendorContent"></div>
@@ -305,12 +305,11 @@ td input{width:85px;background:#0a1223;color:var(--txt);border:1px solid var(--l
 <div class="map-modal" id="mapModal">
   <div class="map-card">
     <div class="map-card-header">
-      <strong style="color:var(--cyan); font-size:14px;">🚚 High-Accuracy Supplier & Vendor Radar (Google Maps)</strong>
+      <strong style="color:var(--cyan); font-size:14px;">🚚 Material Supplier Radar (Google Maps)</strong>
       <button onclick="closeMapModal()">✕ Close</button>
     </div>
     
     <div class="geo-controls">
-      <button class="primary" onclick="autoDetectLocation()">🎯 Exact Device GPS</button>
       <span>Category:</span>
       <select id="boq-material-filter" onchange="searchBoqSuppliers()" style="padding:6px; background:#0a1223; color:#fff; border:1px solid var(--line); border-radius:6px; font-size:12px;">
         <option value="building material store">All Building Material Stores</option>
@@ -322,8 +321,8 @@ td input{width:85px;background:#0a1223;color:var(--txt);border:1px solid var(--l
         <option value="aluminum UPVC windows hardware fittings store">Doors, Hardware & UPVC Windows</option>
       </select>
       
-      <span>Target Location / Pin:</span>
-      <input id="search-location-input" type="text" placeholder="Area, Landmark, City or Lat,Lng" value="Rajajinagar, Bangalore">
+      <span>City / Region:</span>
+      <input id="search-location-input" type="text" placeholder="Type city or country..." value="New York, USA">
       <button class="primary" onclick="searchBoqSuppliers()">🔍 Search Suppliers</button>
     </div>
 
@@ -340,174 +339,173 @@ let plan=null, zoom=1, showDims=true, showGrid=true, showWalls=true, showOpening
 let selectedRoomIndex = null;
 let currentViewMode = '2d';
 
-let userSearchArea = "Rajajinagar, Bangalore";
-let userCountryCode = "IN";
-let userCountryName = "India";
-let userLat = null, userLng = null;
+let userSearchArea = "New York, USA";
+let userCountryCode = "US";
+let userCountryName = "United States";
 
 // Base rates in INR
 const BASE_RATES_INR = [420, 68, 12, 65, 18, 35000];
 
 // Complete ISO 4217 Currency Database (160+ World Currencies)
 const ALL_WORLD_CURRENCIES = {
-  INR: { s: '₹', n: 'Indian Rupee', c: 'IN' },
-  USD: { s: '$', n: 'US Dollar', c: 'US' },
-  EUR: { s: '€', n: 'Euro', c: 'EU' },
-  GBP: { s: '£', n: 'British Pound', c: 'GB' },
-  AED: { s: 'د.إ', n: 'UAE Dirham', c: 'AE' },
-  AFN: { s: '؋', n: 'Afghan Afghani', c: 'AF' },
-  ALL: { s: 'L', n: 'Albanian Lek', c: 'AL' },
-  AMD: { s: '֏', n: 'Armenian Dram', c: 'AM' },
-  ANG: { s: 'ƒ', n: 'NL Antillean Guilder', c: 'CW' },
-  AOA: { s: 'Kz', n: 'Angolan Kwanza', c: 'AO' },
-  ARS: { s: '$', n: 'Argentine Peso', c: 'AR' },
-  AUD: { s: 'A$', n: 'Australian Dollar', c: 'AU' },
-  AWG: { s: 'ƒ', n: 'Aruban Florin', c: 'AW' },
-  AZN: { s: '₼', n: 'Azerbaijani Manat', c: 'AZ' },
-  BAM: { s: 'KM', n: 'Bosnia-Herzegovina Mark', c: 'BA' },
-  BBD: { s: '$', n: 'Barbadian Dollar', c: 'BB' },
-  BDT: { s: '৳', n: 'Bangladeshi Taka', c: 'BD' },
-  BGN: { s: 'лв', n: 'Bulgarian Lev', c: 'BG' },
-  BHD: { s: '.د.ب', n: 'Bahraini Dinar', c: 'BH' },
-  BIF: { s: 'FBu', n: 'Burundian Franc', c: 'BI' },
-  BMD: { s: '$', n: 'Bermudian Dollar', c: 'BM' },
-  BND: { s: '$', n: 'Brunei Dollar', c: 'BN' },
-  BOB: { s: 'Bs.', n: 'Bolivian Boliviano', c: 'BO' },
-  BRL: { s: 'R$', n: 'Brazilian Real', c: 'BR' },
-  BSD: { s: '$', n: 'Bahamian Dollar', c: 'BS' },
-  BTN: { s: 'Nu.', n: 'Bhutanese Ngultrum', c: 'BT' },
-  BWP: { s: 'P', n: 'Botswanan Pula', c: 'BW' },
-  BYN: { s: 'Br', n: 'Belarusian Ruble', c: 'BY' },
-  BZD: { s: '$', n: 'Belize Dollar', c: 'BZ' },
-  CAD: { s: 'C$', n: 'Canadian Dollar', c: 'CA' },
-  CDF: { s: 'FC', n: 'Congolese Franc', c: 'CD' },
-  CHF: { s: 'CHF', n: 'Swiss Franc', c: 'CH' },
-  CLP: { s: '$', n: 'Chilean Peso', c: 'CL' },
-  CNY: { s: '¥', n: 'Chinese Yuan', c: 'CN' },
-  COP: { s: '$', n: 'Colombian Peso', c: 'CO' },
-  CRC: { s: '₡', n: 'Costa Rican Colón', c: 'CR' },
-  CUP: { s: '$', n: 'Cuban Peso', c: 'CU' },
-  CVE: { s: '$', n: 'Cape Verdean Escudo', c: 'CV' },
-  CZK: { s: 'Kč', n: 'Czech Koruna', c: 'CZ' },
-  DJF: { s: 'Fdj', n: 'Djiboutian Franc', c: 'DJ' },
-  DKK: { s: 'kr', n: 'Danish Krone', c: 'DK' },
-  DOP: { s: 'RD$', n: 'Dominican Peso', c: 'DO' },
-  DZD: { s: 'دج', n: 'Algerian Dinar', c: 'DZ' },
-  EGP: { s: '£', n: 'Egyptian Pound', c: 'EG' },
-  ERN: { s: 'Nfk', n: 'Eritrean Nakfa', c: 'ER' },
-  ETB: { s: 'Br', n: 'Ethiopian Birr', c: 'ET' },
-  FJD: { s: '$', n: 'Fijian Dollar', c: 'FJ' },
-  FKP: { s: '£', n: 'Falkland Islands Pound', c: 'FK' },
-  GEL: { s: '₾', n: 'Georgian Lari', c: 'GE' },
-  GHS: { s: 'GH₵', n: 'Ghanaian Cedi', c: 'GH' },
-  GIP: { s: '£', n: 'Gibraltar Pound', c: 'GI' },
-  GMD: { s: 'D', n: 'Gambian Dalasi', c: 'GM' },
-  GNF: { s: 'FG', n: 'Guinean Franc', c: 'GN' },
-  GTQ: { s: 'Q', n: 'Guatemalan Quetzal', c: 'GT' },
-  GYD: { s: '$', n: 'Guyanaese Dollar', c: 'GY' },
-  HKD: { s: 'HK$', n: 'Hong Kong Dollar', c: 'HK' },
-  HNL: { s: 'L', n: 'Honduran Lempira', c: 'HN' },
-  HRK: { s: 'kn', n: 'Croatian Kuna', c: 'HR' },
-  HTG: { s: 'G', n: 'Haitian Gourde', c: 'HT' },
-  HUF: { s: 'Ft', n: 'Hungarian Forint', c: 'HU' },
-  IDR: { s: 'Rp', n: 'Indonesian Rupiah', c: 'ID' },
-  ILS: { s: '₪', n: 'Israeli New Shekel', c: 'IL' },
-  IQD: { s: 'ع.د', n: 'Iraqi Dinar', c: 'IQ' },
-  IRR: { s: '﷼', n: 'Iranian Rial', c: 'IR' },
-  ISK: { s: 'kr', n: 'Icelandic Króna', c: 'IS' },
-  JMD: { s: 'J$', n: 'Jamaican Dollar', c: 'JM' },
-  JOD: { s: 'JD', n: 'Jordanian Dinar', c: 'JO' },
-  JPY: { s: '¥', n: 'Japanese Yen', c: 'JP' },
-  KES: { s: 'KSh', n: 'Kenyan Shilling', c: 'KE' },
-  KGS: { s: 'с', n: 'Kyrgystani Som', c: 'KG' },
-  KHR: { s: '៛', n: 'Cambodian Riel', c: 'KH' },
-  KMF: { s: 'CF', n: 'Comorian Franc', c: 'KM' },
-  KRW: { s: '₩', n: 'South Korean Won', c: 'KR' },
-  KWD: { s: 'KD', n: 'Kuwaiti Dinar', c: 'KW' },
-  KYD: { s: '$', n: 'Cayman Islands Dollar', c: 'KY' },
-  KZT: { s: '₸', n: 'Kazakhstani Tenge', c: 'KZ' },
-  LAK: { s: '₭', n: 'Laotian Kip', c: 'LA' },
-  LBP: { s: 'ل.ل', n: 'Lebanese Pound', c: 'LB' },
-  LKR: { s: 'Rs', n: 'Sri Lankan Rupee', c: 'LK' },
-  LRD: { s: '$', n: 'Liberian Dollar', c: 'LR' },
-  LSL: { s: 'L', n: 'Lesotho Loti', c: 'LS' },
-  LYD: { s: 'LD', n: 'Libyan Dinar', c: 'LY' },
-  MAD: { s: 'DH', n: 'Moroccan Dirham', c: 'MA' },
-  MDL: { s: 'L', n: 'Moldovan Leu', c: 'MD' },
-  MGA: { s: 'Ar', n: 'Malagasy Ariary', c: 'MG' },
-  MKD: { s: 'ден', n: 'Macedonian Denar', c: 'MK' },
-  MMK: { s: 'K', n: 'Myanmar Kyat', c: 'MM' },
-  MNT: { s: '₮', n: 'Mongolian Tugrik', c: 'MN' },
-  MOP: { s: 'MOP$', n: 'Macanese Pataca', c: 'MO' },
-  MRU: { s: 'UM', n: 'Mauritanian Ouguiya', c: 'MR' },
-  MUR: { s: 'Rs', n: 'Mauritian Rupee', c: 'MU' },
-  MVR: { s: 'Rf', n: 'Maldivian Rufiyaa', c: 'MV' },
-  MWK: { s: 'MK', n: 'Malawian Kwacha', c: 'MW' },
-  MXN: { s: '$', n: 'Mexican Peso', c: 'MX' },
-  MYR: { s: 'RM', n: 'Malaysian Ringgit', c: 'MY' },
-  MZN: { s: 'MT', n: 'Mozambican Metical', c: 'MZ' },
-  NAD: { s: '$', n: 'Namibian Dollar', c: 'NA' },
-  NGN: { s: '₦', n: 'Nigerian Naira', c: 'NG' },
-  NIO: { s: 'C$', n: 'Nicaraguan Córdoba', c: 'NI' },
-  NOK: { s: 'kr', n: 'Norwegian Krone', c: 'NO' },
-  NPR: { s: 'Rs', n: 'Nepalese Rupee', c: 'NP' },
-  NZD: { s: 'NZ$', n: 'New Zealand Dollar', c: 'NZ' },
-  OMR: { s: '﷼', n: 'Omani Rial', c: 'OM' },
-  PAB: { s: 'B/.', n: 'Panamanian Balboa', c: 'PA' },
-  PEN: { s: 'S/.', n: 'Peruvian Sol', c: 'PE' },
-  PGK: { s: 'K', n: 'Papua New Guinean Kina', c: 'PG' },
-  PHP: { s: '₱', n: 'Philippine Peso', c: 'PH' },
-  PKR: { s: 'Rs', n: 'Pakistani Rupee', c: 'PK' },
-  PLN: { s: 'zł', n: 'Polish Złoty', c: 'PL' },
-  PYG: { s: '₲', n: 'Paraguayan Guarani', c: 'PY' },
-  QAR: { s: 'QR', n: 'Qatari Rial', c: 'QA' },
-  RON: { s: 'lei', n: 'Romanian Leu', c: 'RO' },
-  RSD: { s: 'дин.', n: 'Serbian Dinar', c: 'RS' },
-  RUB: { s: '₽', n: 'Russian Ruble', c: 'RU' },
-  RWF: { s: 'RF', n: 'Rwandan Franc', c: 'RW' },
-  SAR: { s: '﷼', n: 'Saudi Riyal', c: 'SA' },
-  SBD: { s: '$', n: 'Solomon Islands Dollar', c: 'SB' },
-  SCR: { s: 'SR', n: 'Seychellois Rupee', c: 'SC' },
-  SDG: { s: '£', n: 'Sudanese Pound', c: 'SD' },
-  SEK: { s: 'kr', n: 'Swedish Krona', c: 'SE' },
-  SGD: { s: 'S$', n: 'Singapore Dollar', c: 'SG' },
-  SHP: { s: '£', n: 'Saint Helena Pound', c: 'SH' },
-  SLE: { s: 'Le', n: 'Sierra Leonean Leone', c: 'SL' },
-  SOS: { s: 'Sh', n: 'Somali Shilling', c: 'SO' },
-  SRD: { s: '$', n: 'Surinamese Dollar', c: 'SR' },
-  SSP: { s: '£', n: 'South Sudanese Pound', c: 'SS' },
-  STN: { s: 'Db', n: 'São Tomé & Príncipe Dobra', c: 'ST' },
-  SYP: { s: '£', n: 'Syrian Pound', c: 'SY' },
-  SZL: { s: 'L', n: 'Swazi Lilangeni', c: 'SZ' },
-  THB: { s: '฿', n: 'Thai Baht', c: 'TH' },
-  TJS: { s: 'SM', n: 'Tajikistani Somoni', c: 'TJ' },
-  TMT: { s: 'T', n: 'Turkmenistani Manat', c: 'TM' },
-  TND: { s: 'DT', n: 'Tunisian Dinar', c: 'TN' },
-  TOP: { s: 'T$', n: 'Tongan Paʻanga', c: 'TO' },
-  TRY: { s: '₺', n: 'Turkish Lira', c: 'TR' },
-  TTD: { s: 'TT$', n: 'Trinidad and Tobago Dollar', c: 'TT' },
-  TWD: { s: 'NT$', n: 'New Taiwan Dollar', c: 'TW' },
-  TZS: { s: 'TSh', n: 'Tanzanian Shilling', c: 'TZ' },
-  UAH: { s: '₴', n: 'Ukrainian Hryvnia', c: 'UA' },
-  UGX: { s: 'USh', n: 'Ugandan Shilling', c: 'UG' },
-  UYU: { s: '$U', n: 'Uruguayan Peso', c: 'UY' },
-  UZS: { s: 'so\'m', n: 'Uzbekistani Som', c: 'UZ' },
-  VES: { s: 'Bs.S', n: 'Venezuelan Bolívar', c: 'VE' },
-  VND: { s: '₫', n: 'Vietnamese Dong', c: 'VN' },
-  VUV: { s: 'VT', n: 'Vanuatu Vatu', c: 'VU' },
-  WST: { s: 'WS$', n: 'Samoan Tala', c: 'WS' },
-  XAF: { s: 'FCFA', n: 'Central African CFA Franc', c: 'CM' },
-  XCD: { s: 'EC$', n: 'East Caribbean Dollar', c: 'AG' },
-  XOF: { s: 'CFA', n: 'West African CFA Franc', c: 'SN' },
-  XPF: { s: '₣', n: 'CFP Franc', c: 'PF' },
-  YER: { s: '﷼', n: 'Yemeni Rial', c: 'YE' },
-  ZAR: { s: 'R', n: 'South African Rand', c: 'ZA' },
-  ZMW: { s: 'ZK', n: 'Zambian Kwacha', c: 'ZM' },
-  ZWL: { s: '$', n: 'Zimbabwean Dollar', c: 'ZW' }
+  INR: { s: '₹', n: 'Indian Rupee', c: 'IN', d: 'Bengaluru, India' },
+  USD: { s: '$', n: 'US Dollar', c: 'US', d: 'New York, USA' },
+  EUR: { s: '€', n: 'Euro', c: 'EU', d: 'Berlin, Germany' },
+  GBP: { s: '£', n: 'British Pound', c: 'GB', d: 'London, UK' },
+  AED: { s: 'د.إ', n: 'UAE Dirham', c: 'AE', d: 'Dubai, UAE' },
+  AFN: { s: '؋', n: 'Afghan Afghani', c: 'AF', d: 'Kabul, Afghanistan' },
+  ALL: { s: 'L', n: 'Albanian Lek', c: 'AL', d: 'Tirana, Albania' },
+  AMD: { s: '֏', n: 'Armenian Dram', c: 'AM', d: 'Yerevan, Armenia' },
+  ANG: { s: 'ƒ', n: 'NL Antillean Guilder', c: 'CW', d: 'Willemstad, Curacao' },
+  AOA: { s: 'Kz', n: 'Angolan Kwanza', c: 'AO', d: 'Luanda, Angola' },
+  ARS: { s: '$', n: 'Argentine Peso', c: 'AR', d: 'Buenos Aires, Argentina' },
+  AUD: { s: 'A$', n: 'Australian Dollar', c: 'AU', d: 'Sydney, Australia' },
+  AWG: { s: 'ƒ', n: 'Aruban Florin', c: 'AW', d: 'Oranjestad, Aruba' },
+  AZN: { s: '₼', n: 'Azerbaijani Manat', c: 'AZ', d: 'Baku, Azerbaijan' },
+  BAM: { s: 'KM', n: 'Bosnia-Herzegovina Mark', c: 'BA', d: 'Sarajevo, Bosnia' },
+  BBD: { s: '$', n: 'Barbadian Dollar', c: 'BB', d: 'Bridgetown, Barbados' },
+  BDT: { s: '৳', n: 'Bangladeshi Taka', c: 'BD', d: 'Dhaka, Bangladesh' },
+  BGN: { s: 'лв', n: 'Bulgarian Lev', c: 'BG', d: 'Sofia, Bulgaria' },
+  BHD: { s: '.د.ب', n: 'Bahraini Dinar', c: 'BH', d: 'Manama, Bahrain' },
+  BIF: { s: 'FBu', n: 'Burundian Franc', c: 'BI', d: 'Gitega, Burundi' },
+  BMD: { s: '$', n: 'Bermudian Dollar', c: 'BM', d: 'Hamilton, Bermuda' },
+  BND: { s: '$', n: 'Brunei Dollar', c: 'BN', d: 'Bandar Seri Begawan, Brunei' },
+  BOB: { s: 'Bs.', n: 'Bolivian Boliviano', c: 'BO', d: 'La Paz, Bolivia' },
+  BRL: { s: 'R$', n: 'Brazilian Real', c: 'BR', d: 'Sao Paulo, Brazil' },
+  BSD: { s: '$', n: 'Bahamian Dollar', c: 'BS', d: 'Nassau, Bahamas' },
+  BTN: { s: 'Nu.', n: 'Bhutanese Ngultrum', c: 'BT', d: 'Thimphu, Bhutan' },
+  BWP: { s: 'P', n: 'Botswanan Pula', c: 'BW', d: 'Gaborone, Botswana' },
+  BYN: { s: 'Br', n: 'Belarusian Ruble', c: 'BY', d: 'Minsk, Belarus' },
+  BZD: { s: '$', n: 'Belize Dollar', c: 'BZ', d: 'Belmopan, Belize' },
+  CAD: { s: 'C$', n: 'Canadian Dollar', c: 'CA', d: 'Toronto, Canada' },
+  CDF: { s: 'FC', n: 'Congolese Franc', c: 'CD', d: 'Kinshasa, DR Congo' },
+  CHF: { s: 'CHF', n: 'Swiss Franc', c: 'CH', d: 'Zurich, Switzerland' },
+  CLP: { s: '$', n: 'Chilean Peso', c: 'CL', d: 'Santiago, Chile' },
+  CNY: { s: '¥', n: 'Chinese Yuan', c: 'CN', d: 'Shanghai, China' },
+  COP: { s: '$', n: 'Colombian Peso', c: 'CO', d: 'Bogota, Colombia' },
+  CRC: { s: '₡', n: 'Costa Rican Colón', c: 'CR', d: 'San Jose, Costa Rica' },
+  CUP: { s: '$', n: 'Cuban Peso', c: 'CU', d: 'Havana, Cuba' },
+  CVE: { s: '$', n: 'Cape Verdean Escudo', c: 'CV', d: 'Praia, Cape Verde' },
+  CZK: { s: 'Kč', n: 'Czech Koruna', c: 'CZ', d: 'Prague, Czechia' },
+  DJF: { s: 'Fdj', n: 'Djiboutian Franc', c: 'DJ', d: 'Djibouti City, Djibouti' },
+  DKK: { s: 'kr', n: 'Danish Krone', c: 'DK', d: 'Copenhagen, Denmark' },
+  DOP: { s: 'RD$', n: 'Dominican Peso', c: 'DO', d: 'Santo Domingo, DR' },
+  DZD: { s: 'دج', n: 'Algerian Dinar', c: 'DZ', d: 'Algiers, Algeria' },
+  EGP: { s: '£', n: 'Egyptian Pound', c: 'EG', d: 'Cairo, Egypt' },
+  ERN: { s: 'Nfk', n: 'Eritrean Nakfa', c: 'ER', d: 'Asmara, Eritrea' },
+  ETB: { s: 'Br', n: 'Ethiopian Birr', c: 'ET', d: 'Addis Ababa, Ethiopia' },
+  FJD: { s: '$', n: 'Fijian Dollar', c: 'FJ', d: 'Suva, Fiji' },
+  FKP: { s: '£', n: 'Falkland Islands Pound', c: 'FK', d: 'Stanley, Falkland Islands' },
+  GEL: { s: '₾', n: 'Georgian Lari', c: 'GE', d: 'Tbilisi, Georgia' },
+  GHS: { s: 'GH₵', n: 'Ghanaian Cedi', c: 'GH', d: 'Accra, Ghana' },
+  GIP: { s: '£', n: 'Gibraltar Pound', c: 'GI', d: 'Gibraltar' },
+  GMD: { s: 'D', n: 'Gambian Dalasi', c: 'GM', d: 'Banjul, Gambia' },
+  GNF: { s: 'FG', n: 'Guinean Franc', c: 'GN', d: 'Conakry, Guinea' },
+  GTQ: { s: 'Q', n: 'Guatemalan Quetzal', c: 'GT', d: 'Guatemala City, Guatemala' },
+  GYD: { s: '$', n: 'Guyanaese Dollar', c: 'GY', d: 'Georgetown, Guyana' },
+  HKD: { s: 'HK$', n: 'Hong Kong Dollar', c: 'HK', d: 'Hong Kong' },
+  HNL: { s: 'L', n: 'Honduran Lempira', c: 'HN', d: 'Tegucigalpa, Honduras' },
+  HRK: { s: 'kn', n: 'Croatian Kuna', c: 'HR', d: 'Zagreb, Croatia' },
+  HTG: { s: 'G', n: 'Haitian Gourde', c: 'HT', d: 'Port-au-Prince, Haiti' },
+  HUF: { s: 'Ft', n: 'Hungarian Forint', c: 'HU', d: 'Budapest, Hungary' },
+  IDR: { s: 'Rp', n: 'Indonesian Rupiah', c: 'ID', d: 'Jakarta, Indonesia' },
+  ILS: { s: '₪', n: 'Israeli New Shekel', c: 'IL', d: 'Tel Aviv, Israel' },
+  IQD: { s: 'ع.د', n: 'Iraqi Dinar', c: 'IQ', d: 'Baghdad, Iraq' },
+  IRR: { s: '﷼', n: 'Iranian Rial', c: 'IR', d: 'Tehran, Iran' },
+  ISK: { s: 'kr', n: 'Icelandic Króna', c: 'IS', d: 'Reykjavik, Iceland' },
+  JMD: { s: 'J$', n: 'Jamaican Dollar', c: 'JM', d: 'Kingston, Jamaica' },
+  JOD: { s: 'JD', n: 'Jordanian Dinar', c: 'JO', d: 'Amman, Jordan' },
+  JPY: { s: '¥', n: 'Japanese Yen', c: 'JP', d: 'Tokyo, Japan' },
+  KES: { s: 'KSh', n: 'Kenyan Shilling', c: 'KE', d: 'Nairobi, Kenya' },
+  KGS: { s: 'с', n: 'Kyrgystani Som', c: 'KG', d: 'Bishkek, Kyrgyzstan' },
+  KHR: { s: '៛', n: 'Cambodian Riel', c: 'KH', d: 'Phnom Penh, Cambodia' },
+  KMF: { s: 'CF', n: 'Comorian Franc', c: 'KM', d: 'Moroni, Comoros' },
+  KRW: { s: '₩', n: 'South Korean Won', c: 'KR', d: 'Seoul, South Korea' },
+  KWD: { s: 'KD', n: 'Kuwaiti Dinar', c: 'KW', d: 'Kuwait City, Kuwait' },
+  KYD: { s: '$', n: 'Cayman Islands Dollar', c: 'KY', d: 'George Town, Cayman Islands' },
+  KZT: { s: '₸', n: 'Kazakhstani Tenge', c: 'KZ', d: 'Almaty, Kazakhstan' },
+  LAK: { s: '₭', n: 'Laotian Kip', c: 'LA', d: 'Vientiane, Laos' },
+  LBP: { s: 'ل.ل', n: 'Lebanese Pound', c: 'LB', d: 'Beirut, Lebanon' },
+  LKR: { s: 'Rs', n: 'Sri Lankan Rupee', c: 'LK', d: 'Colombo, Sri Lanka' },
+  LRD: { s: '$', n: 'Liberian Dollar', c: 'LR', d: 'Monrovia, Liberia' },
+  LSL: { s: 'L', n: 'Lesotho Loti', c: 'LS', d: 'Maseru, Lesotho' },
+  LYD: { s: 'LD', n: 'Libyan Dinar', c: 'LY', d: 'Tripoli, Libya' },
+  MAD: { s: 'DH', n: 'Moroccan Dirham', c: 'MA', d: 'Casablanca, Morocco' },
+  MDL: { s: 'L', n: 'Moldovan Leu', c: 'MD', d: 'Chisinau, Moldova' },
+  MGA: { s: 'Ar', n: 'Malagasy Ariary', c: 'MG', d: 'Antananarivo, Madagascar' },
+  MKD: { s: 'ден', n: 'Macedonian Denar', c: 'MK', d: 'Skopje, North Macedonia' },
+  MMK: { s: 'K', n: 'Myanmar Kyat', c: 'MM', d: 'Yangon, Myanmar' },
+  MNT: { s: '₮', n: 'Mongolian Tugrik', c: 'MN', d: 'Ulaanbaatar, Mongolia' },
+  MOP: { s: 'MOP$', n: 'Macanese Pataca', c: 'MO', d: 'Macau' },
+  MRU: { s: 'UM', n: 'Mauritanian Ouguiya', c: 'MR', d: 'Nouakchott, Mauritania' },
+  MUR: { s: 'Rs', n: 'Mauritian Rupee', c: 'MU', d: 'Port Louis, Mauritius' },
+  MVR: { s: 'Rf', n: 'Maldivian Rufiyaa', c: 'MV', d: 'Male, Maldives' },
+  MWK: { s: 'MK', n: 'Malawian Kwacha', c: 'MW', d: 'Lilongwe, Malawi' },
+  MXN: { s: '$', n: 'Mexican Peso', c: 'MX', d: 'Mexico City, Mexico' },
+  MYR: { s: 'RM', n: 'Malaysian Ringgit', c: 'MY', d: 'Kuala Lumpur, Malaysia' },
+  MZN: { s: 'MT', n: 'Mozambican Metical', c: 'MZ', d: 'Maputo, Mozambique' },
+  NAD: { s: '$', n: 'Namibian Dollar', c: 'NA', d: 'Windhoek, Namibia' },
+  NGN: { s: '₦', n: 'Nigerian Naira', c: 'NG', d: 'Lagos, Nigeria' },
+  NIO: { s: 'C$', n: 'Nicaraguan Córdoba', c: 'NI', d: 'Managua, Nicaragua' },
+  NOK: { s: 'kr', n: 'Norwegian Krone', c: 'NO', d: 'Oslo, Norway' },
+  NPR: { s: 'Rs', n: 'Nepalese Rupee', c: 'NP', d: 'Kathmandu, Nepal' },
+  NZD: { s: 'NZ$', n: 'New Zealand Dollar', c: 'NZ', d: 'Auckland, New Zealand' },
+  OMR: { s: '﷼', n: 'Omani Rial', c: 'OM', d: 'Muscat, Oman' },
+  PAB: { s: 'B/.', n: 'Panamanian Balboa', c: 'PA', d: 'Panama City, Panama' },
+  PEN: { s: 'S/.', n: 'Peruvian Sol', c: 'PE', d: 'Lima, Peru' },
+  PGK: { s: 'K', n: 'Papua New Guinean Kina', c: 'PG', d: 'Port Moresby, PNG' },
+  PHP: { s: '₱', n: 'Philippine Peso', c: 'PH', d: 'Manila, Philippines' },
+  PKR: { s: 'Rs', n: 'Pakistani Rupee', c: 'PK', d: 'Karachi, Pakistan' },
+  PLN: { s: 'zł', n: 'Polish Złoty', c: 'PL', d: 'Warsaw, Poland' },
+  PYG: { s: '₲', n: 'Paraguayan Guarani', c: 'PY', d: 'Asuncion, Paraguay' },
+  QAR: { s: 'QR', n: 'Qatari Rial', c: 'QA', d: 'Doha, Qatar' },
+  RON: { s: 'lei', n: 'Romanian Leu', c: 'RO', d: 'Bucharest, Romania' },
+  RSD: { s: 'дин.', n: 'Serbian Dinar', c: 'RS', d: 'Belgrade, Serbia' },
+  RUB: { s: '₽', n: 'Russian Ruble', c: 'RU', d: 'Moscow, Russia' },
+  RWF: { s: 'RF', n: 'Rwandan Franc', c: 'RW', d: 'Kigali, Rwanda' },
+  SAR: { s: '﷼', n: 'Saudi Riyal', c: 'SA', d: 'Riyadh, Saudi Arabia' },
+  SBD: { s: '$', n: 'Solomon Islands Dollar', c: 'SB', d: 'Honiara, Solomon Islands' },
+  SCR: { s: 'SR', n: 'Seychellois Rupee', c: 'SC', d: 'Victoria, Seychelles' },
+  SDG: { s: '£', n: 'Sudanese Pound', c: 'SD', d: 'Khartoum, Sudan' },
+  SEK: { s: 'kr', n: 'Swedish Krona', c: 'SE', d: 'Stockholm, Sweden' },
+  SGD: { s: 'S$', n: 'Singapore Dollar', c: 'SG', d: 'Singapore' },
+  SHP: { s: '£', n: 'Saint Helena Pound', c: 'SH', d: 'Jamestown, Saint Helena' },
+  SLE: { s: 'Le', n: 'Sierra Leonean Leone', c: 'SL', d: 'Freetown, Sierra Leone' },
+  SOS: { s: 'Sh', n: 'Somali Shilling', c: 'SO', d: 'Mogadishu, Somalia' },
+  SRD: { s: '$', n: 'Surinamese Dollar', c: 'SR', d: 'Paramaribo, Suriname' },
+  SSP: { s: '£', n: 'South Sudanese Pound', c: 'SS', d: 'Juba, South Sudan' },
+  STN: { s: 'Db', n: 'São Tomé & Príncipe Dobra', c: 'ST', d: 'Sao Tome' },
+  SYP: { s: '£', n: 'Syrian Pound', c: 'SY', d: 'Damascus, Syria' },
+  SZL: { s: 'L', n: 'Swazi Lilangeni', c: 'SZ', d: 'Mbabane, Eswatini' },
+  THB: { s: '฿', n: 'Thai Baht', c: 'TH', d: 'Bangkok, Thailand' },
+  TJS: { s: 'SM', n: 'Tajikistani Somoni', c: 'TJ', d: 'Dushanbe, Tajikistan' },
+  TMT: { s: 'T', n: 'Turkmenistani Manat', c: 'TM', d: 'Ashgabat, Turkmenistan' },
+  TND: { s: 'DT', n: 'Tunisian Dinar', c: 'TN', d: 'Tunis, Tunisia' },
+  TOP: { s: 'T$', n: 'Tongan Paʻanga', c: 'TO', d: 'Nukuʻalofa, Tonga' },
+  TRY: { s: '₺', n: 'Turkish Lira', c: 'TR', d: 'Istanbul, Turkey' },
+  TTD: { s: 'TT$', n: 'Trinidad and Tobago Dollar', c: 'TT', d: 'Port of Spain, Trinidad' },
+  TWD: { s: 'NT$', n: 'New Taiwan Dollar', c: 'TW', d: 'Taipei, Taiwan' },
+  TZS: { s: 'TSh', n: 'Tanzanian Shilling', c: 'TZ', d: 'Dar es Salaam, Tanzania' },
+  UAH: { s: '₴', n: 'Ukrainian Hryvnia', c: 'UA', d: 'Kyiv, Ukraine' },
+  UGX: { s: 'USh', n: 'Ugandan Shilling', c: 'UG', d: 'Kampala, Uganda' },
+  UYU: { s: '$U', n: 'Uruguayan Peso', c: 'UY', d: 'Montevideo, Uruguay' },
+  UZS: { s: 'so\'m', n: 'Uzbekistani Som', c: 'UZ', d: 'Tashkent, Uzbekistan' },
+  VES: { s: 'Bs.S', n: 'Venezuelan Bolívar', c: 'VE', d: 'Caracas, Venezuela' },
+  VND: { s: '₫', n: 'Vietnamese Dong', c: 'VN', d: 'Ho Chi Minh City, Vietnam' },
+  VUV: { s: 'VT', n: 'Vanuatu Vatu', c: 'VU', d: 'Port Vila, Vanuatu' },
+  WST: { s: 'WS$', n: 'Samoan Tala', c: 'WS', d: 'Apia, Samoa' },
+  XAF: { s: 'FCFA', n: 'Central African CFA Franc', c: 'CM', d: 'Douala, Cameroon' },
+  XCD: { s: 'EC$', n: 'East Caribbean Dollar', c: 'AG', d: 'St. John\'s, Antigua' },
+  XOF: { s: 'CFA', n: 'West African CFA Franc', c: 'SN', d: 'Dakar, Senegal' },
+  XPF: { s: '₣', n: 'CFP Franc', c: 'PF', d: 'Papeete, French Polynesia' },
+  YER: { s: '﷼', n: 'Yemeni Rial', c: 'YE', d: 'Sanaa, Yemen' },
+  ZAR: { s: 'R', n: 'South African Rand', c: 'ZA', d: 'Johannesburg, South Africa' },
+  ZMW: { s: 'ZK', n: 'Zambian Kwacha', c: 'ZM', d: 'Lusaka, Zambia' },
+  ZWL: { s: '$', n: 'Zimbabwean Dollar', c: 'ZW', d: 'Harare, Zimbabwe' }
 };
 
-let currentCurrency = 'INR';
-let currentSymbol = '₹';
+let currentCurrency = 'USD';
+let currentSymbol = '$';
 let exchangeMultiplier = 1.0;
 let rates = [...BASE_RATES_INR];
 
@@ -515,76 +513,55 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),
       nfmt=v=>Number(v||0).toLocaleString(undefined,{maximumFractionDigits:1}), 
       cash=v=>currentSymbol + ' ' + Math.round(v||0).toLocaleString(undefined);
 
-// --- Multi-Country Sourcing Database (Adapts by Country / Region) ---
+// --- Online-Only Retailers & Suppliers (No offline locations, No phone numbers) ---
 const COUNTRY_SUPPLIERS = {
   US: {
     name: "United States",
     cement: {
       query: "ready mix concrete supplier cement plant",
       title: "Cement & Ready-Mix (ASTM C150 Type I/II)",
-      offline: [
-        { name: "Martin Marietta Materials Depot", location: "Regional Bulk Terminal", phone: "+1 (800) 845-6650" },
-        { name: "Vulcan Materials Supply Center", location: "Metropolitan Rail Yard & Distribution", phone: "+1 (866) 885-2261" }
-      ],
       online: [
-        { name: "The Home Depot Pro (Bulk Concrete)", site: "https://www.homedepot.com/c/Pro_Xtra", phone: "+1 (800) 466-3337" },
-        { name: "White Cap Building Materials", site: "https://www.whitecap.com", phone: "+1 (800) 944-8322" }
+        { name: "The Home Depot Pro", site: "https://www.homedepot.com/c/Pro_Xtra" },
+        { name: "White Cap Building Materials", site: "https://www.whitecap.com" }
       ]
     },
     steel: {
       query: "rebar fabricator structural steel stockist",
       title: "Deformed Rebar (Grade 60) & Structural Steel",
-      offline: [
-        { name: "Nucor Rebar Fabrication Division", location: "Regional Steel Processing Facility", phone: "+1 (704) 366-7000" },
-        { name: "CMC Rebar (Commercial Metals Company)", location: "Commercial Industrial Hub", phone: "+1 (214) 689-4300" }
-      ],
       online: [
-        { name: "Builders FirstSource (Structural Steel)", site: "https://www.bldr.com", phone: "+1 (800) 238-6624" },
-        { name: "Ryerson Metal Solutions", site: "https://www.ryerson.com", phone: "+1 (800) 944-2211" }
+        { name: "Builders FirstSource", site: "https://www.bldr.com" },
+        { name: "Ryerson Metal Solutions", site: "https://www.ryerson.com" }
       ]
     },
     bricks: {
       query: "brick and masonry supply concrete block depot",
       title: "Concrete Masonry Units (CMU) & Clay Face Brick",
-      offline: [
-        { name: "Oldcastle APG Masonry Products", location: "State Distribution Yard", phone: "+1 (800) 899-8455" },
-        { name: "Glen-Gery Masonry Supply Center", location: "Direct Brick Depot", phone: "+1 (610) 562-3076" }
-      ],
       online: [
-        { name: "Lowe's for Pros (CMU & Masonry)", site: "https://www.lowes.com/pro", phone: "+1 (800) 445-6937" }
+        { name: "Lowe's for Pros", site: "https://www.lowes.com/pro" }
       ]
     },
     flooring: {
       query: "tile and stone distributor commercial flooring",
       title: "Porcelain, Luxury Vinyl Tile (LVT) & Hardwood",
-      offline: [
-        { name: "Daltile Stone & Tile Showroom", location: "Design District Center", phone: "+1 (800) 933-8453" },
-        { name: "Floor & Decor Pro Premier", location: "Superstore Commercial Desk", phone: "+1 (877) 675-0008" }
-      ],
       online: [
-        { name: "Build.com Commercial Flooring", site: "https://www.build.com", phone: "+1 (800) 375-3403" }
+        { name: "Build.com Commercial Flooring", site: "https://www.build.com" },
+        { name: "Floor & Decor Direct", site: "https://www.flooranddecor.com" }
       ]
     },
     paint: {
       query: "Sherwin Williams commercial paint store PPG Paints",
       title: "Architectural Exterior Acrylic & Latex Coatings",
-      offline: [
-        { name: "Sherwin-Williams Commercial Paint Branch", location: "Contractor Service Counter", phone: "+1 (800) 474-3794" },
-        { name: "PPG Paints Commercial Pro Store", location: "Industrial Coatings Outlet", phone: "+1 (800) 441-9695" }
-      ],
       online: [
-        { name: "Benjamin Moore Pro Direct", site: "https://www.benjaminmoore.com", phone: "+1 (855) 724-6802" }
+        { name: "Sherwin-Williams Pro", site: "https://www.sherwin-williams.com" },
+        { name: "Benjamin Moore Pro Direct", site: "https://www.benjaminmoore.com" }
       ]
     },
     hardware: {
       query: "commercial doors windows architectural hardware supplier",
       title: "Commercial Grade Doors, Insulated Windows & Glazing",
-      offline: [
-        { name: "Ferguson Enterprises Commercial Supply", location: "National Logistics Center", phone: "+1 (888) 334-3748" },
-        { name: "Andersen Windows & Doors Commercial Desk", location: "Architectural Dealer Showcase", phone: "+1 (800) 426-4261" }
-      ],
       online: [
-        { name: "Grainger Industrial Building Supply", site: "https://www.grainger.com", phone: "+1 (800) 472-4643" }
+        { name: "Grainger Industrial Building Supply", site: "https://www.grainger.com" },
+        { name: "Ferguson Commercial Supply", site: "https://www.ferguson.com" }
       ]
     }
   },
@@ -594,68 +571,47 @@ const COUNTRY_SUPPLIERS = {
     cement: {
       query: "builders merchant ready mix concrete Hanson Tarmac",
       title: "Portland Cement (BS EN 197-1 CEM I/II) & Ready-Mix",
-      offline: [
-        { name: "Travis Perkins Builders Merchant", location: "Trade Yard & Regional Hub", phone: "+44 (0)1604 752424" },
-        { name: "Breedon Group Bulk Depot", location: "Aggregates & Asphalt Works", phone: "+44 (0)1332 694000" }
-      ],
       online: [
-        { name: "Selco Builders Warehouse Online", site: "https://www.selcobw.com", phone: "+44 (0)20 8801 1000" },
-        { name: "Jewson Online Trade Desk", site: "https://www.jewson.co.uk", phone: "+44 (0)24 7660 8235" }
+        { name: "Selco Builders Warehouse Online", site: "https://www.selcobw.com" },
+        { name: "Jewson Online Trade Desk", site: "https://www.jewson.co.uk" }
       ]
     },
     steel: {
       query: "reinforcing steel rebar mesh British Steel stockholders",
       title: "High Yield Reinforcing Rebars (BS 4449 B500B)",
-      offline: [
-        { name: "British Steel Distribution Network", location: "Regional Steel Stockholding Yard", phone: "+44 (0)1724 404040" },
-        { name: "Barclay & Mathieson Rebar Hub", location: "Industrial Estate", phone: "+44 (0)141 429 2131" }
-      ],
       online: [
-        { name: "Metals4U UK National Delivery", site: "https://www.metals4u.co.uk", phone: "+44 (0)1937 534318" }
+        { name: "Metals4U UK National Delivery", site: "https://www.metals4u.co.uk" }
       ]
     },
     bricks: {
       query: "brick merchant Ibstock Forterra airlite block supplier",
       title: "Engineering Bricks & Thermalite Aircrete Blocks",
-      offline: [
-        { name: "Ibstock Brick Specification Centre", location: "National Brickworks", phone: "+44 (0)844 800 4575" },
-        { name: "Forterra Building Products Yard", location: "Masonry Distribution Depot", phone: "+44 (0)1604 707600" }
-      ],
       online: [
-        { name: "Buildbase UK Direct", site: "https://www.buildbase.co.uk", phone: "+44 (0)1865 876000" }
+        { name: "Buildbase UK Direct", site: "https://www.buildbase.co.uk" }
       ]
     },
     flooring: {
       query: "porcelain tiles engineered wood flooring trade merchant",
       title: "Vitrified Porcelain & Engineered Hardwood",
-      offline: [
-        { name: "Topps Tiles Trade Pro Centre", location: "Commercial Showroom", phone: "+44 (0)800 783 6262" },
-        { name: "CTD Architectural Tiles Studio", location: "Designer Tile Hub", phone: "+44 (0)800 014 2994" }
-      ],
       online: [
-        { name: "Tile Mountain Trade Direct", site: "https://www.tilemountain.co.uk", phone: "+44 (0)1782 223822" }
+        { name: "Tile Mountain Trade Direct", site: "https://www.tilemountain.co.uk" },
+        { name: "Topps Tiles Trade", site: "https://www.toppstiles.co.uk" }
       ]
     },
     paint: {
       query: "Dulux Decorator Centre Crown Decorating Trade",
       title: "Weather-Shield Masonry & Trade Emulsions",
-      offline: [
-        { name: "Dulux Decorator Centre", location: "High Street Trade Branch", phone: "+44 (0)330 587 1800" },
-        { name: "Crown Decorating Trade Centre", location: "Regional Paint Depot", phone: "+44 (0)330 024 0310" }
-      ],
       online: [
-        { name: "Brewers Decorator Centres", site: "https://www.brewers.co.uk", phone: "+44 (0)1323 411080" }
+        { name: "Brewers Decorator Centres", site: "https://www.brewers.co.uk" },
+        { name: "Dulux Decorator Centre", site: "https://www.duluxdecoratorcentre.co.uk" }
       ]
     },
     hardware: {
       query: "UPVC double glazing doors architectural ironmongery",
       title: "A-Rated Double Glazed Units & Stainless Hardware",
-      offline: [
-        { name: "IronmongeryDirect Trade Hub", location: "National Express Fulfillment Center", phone: "+44 (0)800 0830 555" },
-        { name: "Eurocell UPVC Building Plastics", location: "Trade Counter", phone: "+44 (0)800 988 3047" }
-      ],
       online: [
-        { name: "Screwfix Pro Trade Direct", site: "https://www.screwfix.com", phone: "+44 (0)3330 112 112" }
+        { name: "Screwfix Pro Trade Direct", site: "https://www.screwfix.com" },
+        { name: "IronmongeryDirect", site: "https://www.ironmongerydirect.co.uk" }
       ]
     }
   },
@@ -665,67 +621,45 @@ const COUNTRY_SUPPLIERS = {
     cement: {
       query: "ready mix concrete plant cement company Dubai Abu Dhabi",
       title: "SRC / OPC 53 Grade Cement & Ready-Mix (Gulf Spec)",
-      offline: [
-        { name: "EMSTEEL (Emirates Steel Arkan)", location: "ICAD Industrial City, Abu Dhabi", phone: "+971 2 550 1111" },
-        { name: "Gulf Precast & Concrete Depot", location: "Jebel Ali Industrial Area, Dubai", phone: "+971 4 880 2626" }
-      ],
       online: [
-        { name: "Danube Building Materials Portal", site: "https://www.aldanube.com", phone: "+971 4 883 8388" }
+        { name: "Danube Building Materials Portal", site: "https://www.aldanube.com" }
       ]
     },
     steel: {
       query: "rebar fabricator structural steel supplier Sharjah Dubai",
       title: "Deformed Steel Rebars (BS 4449 B500B / ASTM A615)",
-      offline: [
-        { name: "Tiger Steel Engineering Yard", location: "Industrial Area 13, Sharjah", phone: "+971 6 534 5000" },
-        { name: "Conares Rebar Mill", location: "JAFZA South, Dubai", phone: "+971 4 880 7770" }
-      ],
       online: [
-        { name: "Emirates Steel Bulk Commercial Portal", site: "https://www.emiratessteel.com", phone: "+971 2 550 1111" }
+        { name: "Emirates Steel Commercial Portal", site: "https://www.emiratessteel.com" }
       ]
     },
     bricks: {
       query: "autoclaved aerated concrete block supplier thermal block UAE",
       title: "Thermal Insulated AAC Blocks & Interlock Pavers",
-      offline: [
-        { name: "AlBaddad Building Materials", location: "National Industries Park, Dubai", phone: "+971 4 880 0000" },
-        { name: "Hira Industries AAC Blocks", location: "Dubai Investments Park (DIP)", phone: "+971 4 884 8414" }
-      ],
       online: [
-        { name: "Al Manaratain UAE Masonry Desk", site: "https://almanaratain.com", phone: "+971 4 340 0111" }
+        { name: "Al Manaratain UAE Masonry Desk", site: "https://almanaratain.com" }
       ]
     },
     flooring: {
       query: "RAK ceramics showroom marble granite supplier Dubai",
       title: "Full-Body Porcelain, Italian Marble & Omani Stone",
-      offline: [
-        { name: "RAK Ceramics Design Hub", location: "Sheikh Zayed Road / Al Quoz, Dubai", phone: "+971 4 338 5656" },
-        { name: "Al Khazana Marble & Granite Factory", location: "Mussafah M-14, Abu Dhabi", phone: "+971 2 555 4220" }
-      ],
       online: [
-        { name: "Dragon Mart Wholesale Direct", site: "https://www.dragonmart.ae", phone: "+971 4 437 0111" }
+        { name: "Dragon Mart Wholesale Direct", site: "https://www.dragonmart.ae" },
+        { name: "RAK Ceramics Store", site: "https://www.rakceramics.com" }
       ]
     },
     paint: {
       query: "Jotun Paints store National Paints dealer UAE",
       title: "Heat-Reflective Exterior Fenomastic & Weathercoat",
-      offline: [
-        { name: "Jotun Paints Regional Head Office & Store", location: "Al Quoz Industrial 3, Dubai", phone: "+971 4 339 5000" },
-        { name: "National Paints Showroom", location: "Industrial Area 1, Sharjah", phone: "+971 6 534 0111" }
-      ],
       online: [
-        { name: "Al-Futtaim ACE Hardware Building Section", site: "https://www.aceuae.com", phone: "+971 800 275 223" }
+        { name: "Al-Futtaim ACE Hardware", site: "https://www.aceuae.com" },
+        { name: "Jotun Online Gateway", site: "https://www.jotun.com" }
       ]
     },
     hardware: {
       query: "aluminum curtain wall glazing architectural ironmongery UAE",
       title: "Thermal Break Aluminum Windows, Tempered Glass & Balustrades",
-      offline: [
-        { name: "Zebian Aluminum & Glass Industries", location: "Sajaa Industrial Oasis, Sharjah", phone: "+971 6 531 3131" },
-        { name: "NAFFCO Architectural & Hardware Logistics", location: "JAFZA Downtown, Dubai", phone: "+971 4 815 1111" }
-      ],
       online: [
-        { name: "Danube Home Hardware Portal", site: "https://www.danubehome.com", phone: "+971 800 326 823" }
+        { name: "Danube Home Hardware Portal", site: "https://www.danubehome.com" }
       ]
     }
   },
@@ -735,67 +669,45 @@ const COUNTRY_SUPPLIERS = {
     cement: {
       query: "ready mix concrete plant cement supplier Ontario BC Quebec",
       title: "General Use (GU) / Portland-Limestone (GUL) Cement",
-      offline: [
-        { name: "Lafarge Canada Regional Aggregates", location: "Terminal Facility", phone: "+1 (866) 523-2743" },
-        { name: "St Marys Cement (Votorantim Cimentos)", location: "Bulk Cement Terminal", phone: "+1 (416) 230-7000" }
-      ],
       online: [
-        { name: "RONA+ Pro Commercial Services", site: "https://www.rona.ca/en/pro", phone: "+1 (866) 283-2239" }
+        { name: "RONA+ Pro Commercial Services", site: "https://www.rona.ca/en/pro" }
       ]
     },
     steel: {
       query: "rebar fabricator structural steel beams Canam Ryerson Canada",
       title: "Weldable Deformed Billet Steel (CSA G30.18 400W)",
-      offline: [
-        { name: "Canam Group Structural Steel Plants", location: "Provincial Fabrication Yard", phone: "+1 (877) 499-2262" },
-        { name: "Ryerson Canada Metal Center", location: "Distribution Facility", phone: "+1 (800) 944-2211" }
-      ],
       online: [
-        { name: "Russell Metals National Commercial Supply", site: "https://www.russellmetals.com", phone: "+1 (905) 819-7777" }
+        { name: "Russell Metals Commercial Supply", site: "https://www.russellmetals.com" }
       ]
     },
     bricks: {
       query: "brick and stone masonry concrete block supplier Canada",
       title: "Architectural Precast Stone & Concrete Masonry Units",
-      offline: [
-        { name: "Brampton Brick Works Depot", location: "Clay Brick & Paver Plant", phone: "+1 (800) 462-7425" },
-        { name: "Shouldice Designer Stone Works", location: "Direct Masonry Depot", phone: "+1 (800) 265-3174" }
-      ],
       online: [
-        { name: "Home Hardware Building Centre", site: "https://www.homehardware.ca", phone: "+1 (877) 940-4663" }
+        { name: "Home Hardware Building Centre", site: "https://www.homehardware.ca" }
       ]
     },
     flooring: {
       query: "commercial tiles showroom engineered hardwood floor Canada",
       title: "Frost-Proof Porcelain, Granite Slab & Maple Hardwood",
-      offline: [
-        { name: "Olympia Tile & Stone Showroom", location: "Metropolitan Design Hub", phone: "+1 (800) 268-1613" },
-        { name: "Ciot Stone & Ceramic Gallery", location: "Architectural Tile Lounge", phone: "+1 (888) 246-8226" }
-      ],
       online: [
-        { name: "End Of The Roll Flooring Centres", site: "https://www.endoftheroll.com", phone: "+1 (800) 667-3636" }
+        { name: "End Of The Roll Flooring Centres", site: "https://www.endoftheroll.com" }
       ]
     },
     paint: {
       query: "Dulux Paints commercial store Benjamin Moore Pro Canada",
       title: "Cold-Weather Low-VOC Exterior Acrylics",
-      offline: [
-        { name: "Dulux Paints Commercial Store", location: "Trade Counter", phone: "+1 (800) 387-3663" },
-        { name: "Benjamin Moore Retailer Pro Center", location: "Authorized Center", phone: "+1 (800) 361-5898" }
-      ],
       online: [
-        { name: "Sherwin-Williams Canada Commercial", site: "https://www.sherwin-williams.ca", phone: "+1 (800) 474-3794" }
+        { name: "Sherwin-Williams Canada Commercial", site: "https://www.sherwin-williams.ca" },
+        { name: "Benjamin Moore Canada", site: "https://www.benjaminmoore.ca" }
       ]
     },
     hardware: {
       query: "triple pane windows commercial doors hardware Canada",
       title: "ENERGY STAR Zone 3 Triple Glazed Windows & Steel Entry Doors",
-      offline: [
-        { name: "JELD-WEN Canada Commercial Systems", location: "Direct Distribution Yard", phone: "+1 (800) 535-3936" },
-        { name: "Richelieu Hardware Architectural Division", location: "Industrial Supply Branch", phone: "+1 (800) 361-6000" }
-      ],
       online: [
-        { name: "Home Depot Canada Pro Desk", site: "https://www.homedepot.ca/pro", phone: "+1 (800) 668-2266" }
+        { name: "Home Depot Canada Pro Desk", site: "https://www.homedepot.ca/pro" },
+        { name: "Richelieu Hardware", site: "https://www.richelieu.com" }
       ]
     }
   },
@@ -805,67 +717,44 @@ const COUNTRY_SUPPLIERS = {
     cement: {
       query: "ready mix concrete supplier Boral Hanson Holcim Australia",
       title: "General Purpose (GP) Cement & Concrete (AS 3972)",
-      offline: [
-        { name: "Boral Concrete & Aggregates Depot", location: "State Logistics Hub", phone: "+61 1300 267 251" },
-        { name: "Holcim Australia Quarry & Batching Plant", location: "Regional Concrete Center", phone: "+61 13 11 88" }
-      ],
       online: [
-        { name: "Bunnings Trade PowerPass Desk", site: "https://trade.bunnings.com.au", phone: "+61 1800 980 050" }
+        { name: "Bunnings Trade PowerPass Desk", site: "https://trade.bunnings.com.au" }
       ]
     },
     steel: {
       query: "BlueScope steel rebar reinforcing mesh Infravest Australia",
       title: "500N Deformed Reinforcing Bar & TRUECORE Steel",
-      offline: [
-        { name: "BlueScope Distribution Centre", location: "Industrial Steel Service Yard", phone: "+61 13 72 82" },
-        { name: "InfraBuild (ARC Reinforcing)", location: "State Steel Mesh Facility", phone: "+61 1800 732 272" }
-      ],
       online: [
-        { name: "Bowens The Builders Choice", site: "https://www.bowens.com.au", phone: "+61 1300 269 367" }
+        { name: "Bowens The Builders Choice", site: "https://www.bowens.com.au" }
       ]
     },
     bricks: {
       query: "Brickworks Austral Bricks concrete block masonry depot",
       title: "Dry Pressed Face Bricks & Besser Concrete Blocks",
-      offline: [
-        { name: "Brickworks Building Products / Austral Bricks", location: "Design Studio & Brickworks", phone: "+61 13 24 07" },
-        { name: "PGH Bricks & Pavers Display Centre", location: "Commercial Display Depot", phone: "+61 13 15 79" }
-      ],
       online: [
-        { name: "National Masonry Direct", site: "https://nationalmasonry.com.au", phone: "+61 1800 004 000" }
+        { name: "National Masonry Direct", site: "https://nationalmasonry.com.au" }
       ]
     },
     flooring: {
       query: "Beaumont Tiles National Tiles commercial showroom Australia",
       title: "Vitrified Outdoor Pavers & Spotted Gum Hardwood",
-      offline: [
-        { name: "National Tiles Trade Centre", location: "Showroom & Trade Counter", phone: "+61 1300 733 000" },
-        { name: "Beaumont Tiles Commercial Studio", location: "Tile & Stone Gallery", phone: "+61 1800 484 537" }
-      ],
       online: [
-        { name: "Amber Tiles Commercial Online", site: "https://www.ambertiles.com.au", phone: "+61 1300 139 868" }
+        { name: "Amber Tiles Commercial Online", site: "https://www.ambertiles.com.au" },
+        { name: "National Tiles Online", site: "https://www.nationaltiles.com.au" }
       ]
     },
     paint: {
       query: "Dulux Trade Centre Taubmans Paint store Australia",
       title: "Weathershield Anti-UV Exterior & Low VOC Acrylics",
-      offline: [
-        { name: "Dulux Trade Centre", location: "Metropolitan Commercial Store", phone: "+61 13 23 77" },
-        { name: "Taubmans Professional Trade Store", location: "Paint Center", phone: "+61 13 16 86" }
-      ],
       online: [
-        { name: "Inspirations Paint Commercial Portal", site: "https://www.inspirationspaint.com.au", phone: "+61 1300 368 325" }
+        { name: "Inspirations Paint Commercial Portal", site: "https://www.inspirationspaint.com.au" }
       ]
     },
     hardware: {
       query: "Bradnam's Windows Stegbar G.James architectural glass",
       title: "Bushfire Rated Double Glazing & Louvered Systems",
-      offline: [
-        { name: "G.James Glass & Aluminium Works", location: "Fabrication & Trade Centre", phone: "+61 132 522" },
-        { name: "Stegbar Windows & Doors Trade Hub", location: "Architectural Showcase", phone: "+61 1800 681 168" }
-      ],
       online: [
-        { name: "Bunnings Commercial Fasteners & Fittings", site: "https://trade.bunnings.com.au", phone: "+61 1800 980 050" }
+        { name: "Bunnings Commercial Fasteners & Fittings", site: "https://trade.bunnings.com.au" }
       ]
     }
   },
@@ -875,69 +764,46 @@ const COUNTRY_SUPPLIERS = {
     cement: {
       query: "UltraTech cement dealer Shankara Buildpro ready mix concrete",
       title: "Cement Sourcing (OPC/PPC 53 Grade)",
-      offline: [
-        { name: "Shankara Buildpro", location: "Rajajinagar & Yeshwanthpur Hub, Bangalore", phone: "+91 80 4011 7777 / 1800-212-3311" },
-        { name: "UltraTech Building Solutions Depot", location: "Peenya Industrial Area, Bangalore", phone: "+91 80 2839 5511" }
-      ],
       online: [
-        { name: "BuildersMART Cement Desk", site: "https://www.buildersmart.in", phone: "+91 93393 30099" },
-        { name: "IBO Wholesale Hub", site: "https://www.ibo.com", phone: "+91 1800 572 8344" }
+        { name: "BuildersMART Cement Desk", site: "https://www.buildersmart.in" },
+        { name: "IBO Wholesale Hub", site: "https://www.ibo.com" }
       ]
     },
     steel: {
       query: "TMT bar dealer JSW Kamdhenu SAIL stockist steel yard",
       title: "TMT Rebars & Structural Fe550D Steel",
-      offline: [
-        { name: "Kamdhenu & JSW Authorised Stockist", location: "APMC Yard, Yeshwanthpur, Bangalore", phone: "+91 80 2347 1199" },
-        { name: "SAIL Regional Yard", location: "Whitefield Container Terminal, Bangalore", phone: "+91 80 2845 2210" }
-      ],
       online: [
-        { name: "JSW One MSME Mart", site: "https://www.jswonemsme.com", phone: "+91 1800 22 5400" },
-        { name: "BuildersMART Steel", site: "https://www.buildersmart.in", phone: "+91 93393 30099" }
+        { name: "JSW One MSME Mart", site: "https://www.jswonemsme.com" },
+        { name: "BuildersMART Steel", site: "https://www.buildersmart.in" }
       ]
     },
     bricks: {
       query: "AAC block supplier wirecut red clay bricks depot",
       title: "AAC Blocks & Red Wirecut Bricks",
-      offline: [
-        { name: "Bangalore Brick Works Depot", location: "Nelamangala Highway / Magadi Road", phone: "+91 98450 12890" },
-        { name: "Birla Aerocon AAC Depot", location: "Peenya 3rd Phase, Bangalore", phone: "+91 80 2837 4000" }
-      ],
       online: [
-        { name: "IndiaMART Verified Block Dealers", site: "https://dir.indiamart.com/bangalore/aac-blocks.html", phone: "Direct Seller Chat" }
+        { name: "IndiaMART Verified Block Dealers", site: "https://dir.indiamart.com/bangalore/aac-blocks.html" }
       ]
     },
     flooring: {
       query: "Kajaria tile world Somany granite marble showroom",
       title: "Vitrified Tiles, Granite & Marble",
-      offline: [
-        { name: "Kajaria Tile World Grand Showroom", location: "Hosur Road / BTM Layout, Bangalore", phone: "+91 80 4110 5000" },
-        { name: "Somany Exclusive Studio", location: "Rajajinagar 1st Block, Bangalore", phone: "+91 80 2315 6700" }
-      ],
       online: [
-        { name: "IBO Flooring & Wall Tiles", site: "https://www.ibo.com", phone: "+91 1800 572 8344" }
+        { name: "IBO Flooring & Wall Tiles", site: "https://www.ibo.com" },
+        { name: "Kajaria Ceramics Online", site: "https://www.kajariaceramics.com" }
       ]
     },
     paint: {
       query: "Asian Paints colour ideas Berger paints dealer store",
       title: "Exterior Weathercoat & Luxury Emulsions",
-      offline: [
-        { name: "Asian Paints Colour Ideas Lounge", location: "Rajajinagar & Malleshwaram, Bangalore", phone: "+91 80 2334 5612" },
-        { name: "Berger Paints Experience Centre", location: "Yeshwanthpur Market, Bangalore", phone: "+91 80 2337 9922" }
-      ],
       online: [
-        { name: "Asian Paints Direct Concierge", site: "https://www.asianpaints.com", phone: "+91 1800 209 5678" }
+        { name: "Asian Paints Direct Concierge", site: "https://www.asianpaints.com" }
       ]
     },
     hardware: {
       query: "Fenesta UPVC windows doors architectural hardware shop",
       title: "Doors, Windows, UPVC Glazing & Hardware",
-      offline: [
-        { name: "Fenesta Windows Experience Lounge", location: "Indiranagar 100ft Rd / Rajajinagar", phone: "+91 80 4125 1199" },
-        { name: "Laxmi Plywood & Hardware Fittings", location: "Industrial Suburb, Bangalore", phone: "+91 80 2330 4512" }
-      ],
       online: [
-        { name: "IBO Hardware & Fixture Hub", site: "https://www.ibo.com", phone: "+91 1800 572 8344" }
+        { name: "IBO Hardware & Fixture Hub", site: "https://www.ibo.com" }
       ]
     }
   },
@@ -947,63 +813,45 @@ const COUNTRY_SUPPLIERS = {
     cement: {
       query: "cement dealer concrete ready mix supplier",
       title: "Portland Cement (ASTM/EN Standard) & Ready-Mix",
-      offline: [
-        { name: "Holcim Group Logistics Terminal", location: "Regional Port & Rail Terminal", phone: "+41 58 858 8600" },
-        { name: "Cemex Global Materials Distribution", location: "Commercial Port Terminal", phone: "+52 81 8888 8888" }
-      ],
       online: [
-        { name: "CRH Direct Construction Hub", site: "https://www.crh.com", phone: "+353 1 404 1000" }
+        { name: "CRH Direct Construction Hub", site: "https://www.crh.com" },
+        { name: "Holcim Group Logistics", site: "https://www.holcim.com" }
       ]
     },
     steel: {
       query: "structural steel rebar stockholders metal depot",
       title: "Deformed Concrete Reinforcement Rebars",
-      offline: [
-        { name: "ArcelorMittal Global Distribution", location: "Regional Steel Center", phone: "+352 4792 1" },
-        { name: "Nippon Steel International Yard", location: "Wharf Distribution Center", phone: "+81 3 6867 4111" }
-      ],
       online: [
-        { name: "Alibaba Verified Trade Metal Suppliers", site: "https://www.alibaba.com", phone: "Direct Verified Supplier Chat" }
+        { name: "Alibaba Verified Trade Metal Suppliers", site: "https://www.alibaba.com" },
+        { name: "ArcelorMittal Distribution", site: "https://corporate.arcelormittal.com" }
       ]
     },
     bricks: {
       query: "concrete masonry blocks clay face brick depot",
       title: "Autoclaved Concrete Blocks & Solid Bricks",
-      offline: [
-        { name: "Wienerberger International Masonry Yard", location: "Industrial Brickworks", phone: "+43 1 60 1920" }
-      ],
       online: [
-        { name: "Saint-Gobain Building Distribution", site: "https://www.saint-gobain.com", phone: "+33 1 88 54 00 00" }
+        { name: "Saint-Gobain Building Distribution", site: "https://www.saint-gobain.com" }
       ]
     },
     flooring: {
       query: "porcelain tiles marble slab granite distributor",
       title: "Glazed Vitrified Porcelain & Granite Slabs",
-      offline: [
-        { name: "Marazzi Ceramic Showroom", location: "Trade District Flagship", phone: "+39 0536 860800" }
-      ],
       online: [
-        { name: "Porcelanosa Grupo International", site: "https://www.porcelanosa.com", phone: "+34 964 507 100" }
+        { name: "Porcelanosa Grupo International", site: "https://www.porcelanosa.com" }
       ]
     },
     paint: {
       query: "protective coatings commercial paint distributor PPG Sherwin",
       title: "Weatherproof Exterior Acrylics & Coatings",
-      offline: [
-        { name: "AkzoNobel / Dulux International Trade Counter", location: "Wholesale Paint Center", phone: "+31 88 969 7777" }
-      ],
       online: [
-        { name: "PPG Architectural Coatings Global", site: "https://www.ppgpaints.com", phone: "+1 (800) 441-9695" }
+        { name: "PPG Architectural Coatings Global", site: "https://www.ppgpaints.com" }
       ]
     },
     hardware: {
       query: "architectural ironmongery commercial windows doors",
       title: "Double Glazed Windows & Heavy-Duty Hardware",
-      offline: [
-        { name: "Assa Abloy Architectural Solutions", location: "Regional Door Security Center", phone: "+46 8 506 485 00" }
-      ],
       online: [
-        { name: "RS Components Industrial Supply", site: "https://www.rs-online.com", phone: "+44 (0)1536 201201" }
+        { name: "RS Components Industrial Supply", site: "https://www.rs-online.com" }
       ]
     }
   }
@@ -1013,7 +861,6 @@ function getActiveCountrySourcing() {
   if (COUNTRY_SUPPLIERS[userCountryCode]) {
     return COUNTRY_SUPPLIERS[userCountryCode];
   }
-  // Check currency match if country code not explicitly set
   const curItem = ALL_WORLD_CURRENCIES[currentCurrency];
   if (curItem && COUNTRY_SUPPLIERS[curItem.c]) {
     return COUNTRY_SUPPLIERS[curItem.c];
@@ -1034,7 +881,6 @@ function populateAllCurrencies() {
   sel.value = currentCurrency;
 }
 
-// --- Auto-Detect Country & Currency via IP Geolocation & Live FX ---
 async function detectLocationAndCurrency() {
   populateAllCurrencies();
   try {
@@ -1042,10 +888,6 @@ async function detectLocationAndCurrency() {
     if(!geoRes.ok) throw new Error('Geo fetch failed');
     const geo = await geoRes.json();
     
-    if(geo.latitude && geo.longitude) {
-      userLat = geo.latitude;
-      userLng = geo.longitude;
-    }
     if(geo.country_code) {
       userCountryCode = geo.country_code.toUpperCase();
       userCountryName = geo.country_name || userCountryCode;
@@ -1061,23 +903,25 @@ async function detectLocationAndCurrency() {
         $('userCurrency').value = code;
       }
       await updateRatesForCurrency(code);
-      $('status').textContent = `Localized to ${userCountryName} (${code} — ${ALL_WORLD_CURRENCIES[code]?.s || ''}). Local suppliers loaded.`;
+      $('status').textContent = `Localized to ${userCountryName} (${code} — ${ALL_WORLD_CURRENCIES[code]?.s || ''}). Online retailers loaded.`;
       return;
     }
   } catch (err) {
-    console.warn('Geolocation detection failed, fallback loaded.');
+    console.warn('Geolocation detection failed, default USD loaded.');
   }
-  updateRatesForCurrency('INR');
+  updateRatesForCurrency('USD');
 }
 
 async function updateRatesForCurrency(currencyCode) {
   currentCurrency = currencyCode;
-  const cData = ALL_WORLD_CURRENCIES[currencyCode] || { s: currencyCode, n: currencyCode, c: 'GLOBAL' };
+  const cData = ALL_WORLD_CURRENCIES[currencyCode] || { s: currencyCode, n: currencyCode, c: 'GLOBAL', d: 'Global' };
   currentSymbol = cData.s;
   
   if (cData.c && COUNTRY_SUPPLIERS[cData.c]) {
     userCountryCode = cData.c;
     userCountryName = COUNTRY_SUPPLIERS[cData.c].name;
+    userSearchArea = cData.d || userSearchArea;
+    $('search-location-input').value = userSearchArea;
   }
   
   document.querySelectorAll('.currency-tag').forEach(el => el.textContent = currentSymbol);
@@ -1789,7 +1633,7 @@ function updateBOQ(){
       <td><input type="number" min="0" step="any" value="${r.rate}" aria-label="Rate for ${r.name}" data-rate="${i}"></td>
       <td>${cash(r.qty*r.rate)}</td>
       <td>
-        <button class="small primary" onclick="showVendors('${r.key}')">📋 Direct Contacts</button>
+        <button class="small primary" onclick="showVendors('${r.key}')">🌐 Online Retailers</button>
         <button class="small gis" onclick="locateSuppliersOnMap('${r.key}')">📍 Maps</button>
       </td>
     `;
@@ -1805,34 +1649,22 @@ function updateBOQ(){
   $('boqSummary').textContent=`Base Materials: ${cash(t.base)} · Labour/Contingency: ${cash(t.labor)} · Total Forecast: ${cash(t.total)}.`;
 }
 
-// Country-Specific Supplier Modal View
+// Online-Only Verified Retailers Modal View
 window.showVendors = function(key){
   const countryData = getActiveCountrySourcing();
   const v = countryData[key] || COUNTRY_SUPPLIERS.GLOBAL[key];
   if(!v) return;
   const box = $('vendorBox');
-  $('vendorTitle').innerText = `${countryData.name} Desk: ${v.title}`;
+  $('vendorTitle').innerText = `${countryData.name} Online Sourcing: ${v.title}`;
   
-  let html = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">`;
-  html += `<div><strong style="color:var(--gold);">📍 Verified Physical Depots & Yards (${countryData.name}):</strong>`;
-  (v.offline || []).forEach(o=>{
-    html += `<div style="margin-top:6px; background:#121b30; padding:8px; border-radius:6px; border:1px solid var(--line);">
-      <div style="font-weight:700; color:#fff;">${o.name}</div>
-      <div style="color:var(--muted); font-size:11px;">📍 ${o.location}</div>
-      <div style="color:var(--green); font-size:11px; margin-top:3px;">📞 ${o.phone}</div>
+  let html = `<div><strong style="color:var(--cyan);">🌐 Major Online Portals & Platforms (${countryData.name}):</strong>`;
+  (v.online || []).forEach(on=>{
+    html += `<div style="margin-top:6px; background:#121b30; padding:10px; border-radius:6px; border:1px solid var(--line); display:flex; justify-content:space-between; align-items:center;">
+      <div style="font-weight:700; color:#fff;">${on.name}</div>
+      <div><a href="${on.site}" target="_blank" style="color:var(--cyan); text-decoration:underline; font-size:12px;">Visit Website ↗</a></div>
     </div>`;
   });
   html += `</div>`;
-
-  html += `<div><strong style="color:var(--cyan);">🌐 Major Online Portals & Bulk Hubs:</strong>`;
-  (v.online || []).forEach(on=>{
-    html += `<div style="margin-top:6px; background:#121b30; padding:8px; border-radius:6px; border:1px solid var(--line);">
-      <div style="font-weight:700; color:#fff;">${on.name}</div>
-      <div style="font-size:11px; margin-top:2px;"><a href="${on.site}" target="_blank" style="color:var(--cyan); text-decoration:underline;">${on.site}</a></div>
-      <div style="color:var(--green); font-size:11px; margin-top:3px;">📞 ${on.phone}</div>
-    </div>`;
-  });
-  html += `</div></div>`;
 
   $('vendorContent').innerHTML = html;
   box.classList.add('active');
@@ -1859,7 +1691,7 @@ function download(blob,name){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
-// --- High-Accuracy Material Suppliers Google Maps Integration ---
+// --- Material Suppliers Google Maps Integration ---
 window.openMapModal=function(){
   $('mapModal').classList.add('active');
   searchBoqSuppliers();
@@ -1880,40 +1712,8 @@ window.locateSuppliersOnMap = function(materialKey){
 window.searchBoqSuppliers = function(){
   const area = $('search-location-input').value.trim() || userSearchArea;
   const materialType = $('boq-material-filter').value;
-
-  let query;
-  if (userLat && userLng && area.includes(`${userLat.toFixed(4)}`)) {
-    query = `${materialType}&ll=${userLat},${userLng}`;
-  } else {
-    query = `${materialType} in ${area}`;
-  }
-
-  $('gis-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=m&z=15&ie=UTF8&iwloc=&output=embed`;
-};
-
-window.autoDetectLocation = function(){
-  if(navigator.geolocation){
-    $('status').textContent = 'Requesting GPS precision...';
-    navigator.geolocation.getCurrentPosition((pos)=>{
-      userLat = pos.coords.latitude;
-      userLng = pos.coords.longitude;
-      const materialType = $('boq-material-filter').value;
-      const coordStr = `${userLat.toFixed(5)}, ${userLng.toFixed(5)}`;
-      $('search-location-input').value = coordStr;
-      
-      const query = `${materialType}&ll=${userLat},${userLng}`;
-      $('gis-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=m&z=15&ie=UTF8&iwloc=&output=embed`;
-      $('status').textContent = `High-accuracy GPS locked: ${coordStr}`;
-    }, (err)=>{
-      alert("GPS precision unavailable. Type your exact street, pin code, or area in the input box.");
-    }, {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 0
-    });
-  } else {
-    alert("Geolocation is not supported by your browser.");
-  }
+  const query = `${materialType} in ${area}`;
+  $('gis-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=m&z=13&ie=UTF8&iwloc=&output=embed`;
 };
 
 $('search-location-input').addEventListener('keydown', (e)=>{
@@ -2075,7 +1875,7 @@ $('save').onclick=()=>{
   if(!plan){$('status').textContent='Generate a plan first.';return;}
   download(new Blob([JSON.stringify({
     app:'Archform',
-    version:6,
+    version:7,
     currency:currentCurrency,
     rates,
     plan,
