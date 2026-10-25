@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="google-site-verification" content="PlYMij8EQWbJ-I55TL0Soqq0fadDBDHNGEJida0SbKM">
-<title>Archform — Architectural Elevation </title>
+<title>Archform — Architectural CAD, 3D Elevation & Material Sourcing</title>
 
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800'%3E%3Ccircle cx='400' cy='400' r='370' fill='%23090e1d' stroke='%2322d3ee' stroke-width='16'/%3E%3Cg stroke='%2322d3ee' fill='none'%3E%3Cpath d='M 230 600 L 230 380 Q 230 260 400 190 Q 570 260 570 380 L 570 600' stroke-width='20'/%3E%3Cpath d='M 285 600 L 285 400 Q 285 295 400 235 Q 515 295 515 400 L 515 600' stroke-width='20'/%3E%3C/g%3E%3C/svg%3E">
 
@@ -82,7 +82,7 @@ td input{width:75px;background:#0a1223;color:var(--txt);border:1px solid var(--l
 .vendor-info-box{background:#0a1223;border:1px solid var(--cyan);border-radius:8px;padding:10px;margin-top:10px;font-size:12px;display:none}
 .vendor-info-box.active{display:block}
 
-/* Map Modal */
+/* Material Sourcing Map Modal */
 .map-modal{display:none;position:fixed;inset:0;background:rgba(9,14,29,0.85);backdrop-filter:blur(6px);z-index:100;align-items:center;justify-content:center;padding:14px}
 .map-modal.active{display:flex}
 .map-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;width:100%;max-width:880px;height:85vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 12px 35px rgba(0,0,0,0.6)}
@@ -91,7 +91,7 @@ td input{width:75px;background:#0a1223;color:var(--txt);border:1px solid var(--l
 .map-view-frame iframe{width:100%;height:100%;border:none}
 
 .geo-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--panel2);padding:10px 14px;border-bottom:1px solid var(--line);font-size:12px}
-.geo-controls input[type="text"]{padding:6px 10px;background:#0a1223;color:#fff;border:1px solid var(--line);border-radius:6px;min-width:220px;font-size:12px}
+.geo-controls input[type="text"]{padding:6px 10px;background:#0a1223;color:#fff;border:1px solid var(--line);border-radius:6px;min-width:260px;font-size:12px}
 
 @media(max-width:900px){
   .layout,.lower{grid-template-columns:1fr}
@@ -117,12 +117,12 @@ td input{width:75px;background:#0a1223;color:var(--txt);border:1px solid var(--l
      </svg>
    </div>
    <div>
-     <h1>ARCHFORM <span class="pill">2D · 3D · PHOTO EXPORT</span></h1>
-     <p>AI Concept CAD, Custom Villa Elevation & HD Presentation Sheet.</p>
+     <h1>ARCHFORM <span class="pill">2D · 3D · BOQ SOURCING</span></h1>
+     <p>AI Concept CAD, Custom Villa Elevation & BOQ Material Logistics.</p>
    </div>
  </div>
  <div class="actions">
-   <button class="gis" id="openMap">🗺️ Site GIS & Location</button>
+   <button class="gis" id="openBoqMap">🗺️ Find Nearby Suppliers (Maps)</button>
    <button id="save">Save JSON</button>
    <button id="open">Open JSON</button>
    <input id="file" type="file" accept=".json,application/json" style="display:none">
@@ -273,14 +273,10 @@ td input{width:75px;background:#0a1223;color:var(--txt);border:1px solid var(--l
 </section>
 
 <section class="panel">
-  <div class="ph">Site Location & Architectural Notes</div>
+  <div class="ph">Architectural Specs & FAR Envelope</div>
   <div class="pb">
-    <div class="field">
-      <label>Site Location Status</label>
-      <div style="font-size:12px; color:var(--cyan); font-weight:600;" id="siteLocStatus">📍 Rajajinagar, Bangalore (12.9716° N, 77.5946° E)</div>
-    </div>
-    <div style="margin-top:10px;">
-      <p class="hint"><strong>Elevation Specifications:</strong> Board-formed concrete left wing[span_0](start_span)[span_0](end_span), floating white cantilever box frame[span_1](start_span)[span_1](end_span), teak louver screening[span_2](start_span)[span_2](end_span), seamless glass balcony[span_3](start_span)[span_3](end_span), modern portico carport[span_4](start_span)[span_4](end_span), and illuminated landscape pavers[span_5](start_span)[span_5](end_span).</p>
+    <div>
+      <p class="hint"><strong>Elevation Specifications:</strong> Board-formed concrete left wing, floating white cantilever box frame, teak louver screening, seamless glass balcony, modern portico carport, and illuminated landscape pavers.</p>
     </div>
     <hr style="border:0;border-top:1px solid var(--line);margin:12px 0">
     <div class="fields">
@@ -296,24 +292,30 @@ td input{width:75px;background:#0a1223;color:var(--txt);border:1px solid var(--l
 <div class="footer">Archform · Architecture CAD, 3D Rendering & Sourcing Platform.</div>
 </div>
 
-<!-- Map Modal (Clean Google Maps) -->
+<!-- BOQ Material Suppliers Map Modal -->
 <div class="map-modal" id="mapModal">
   <div class="map-card">
     <div class="map-card-header">
-      <strong style="color:var(--txt); font-size:14px;">🌍 Google Maps Site Survey</strong>
+      <strong style="color:var(--cyan); font-size:14px;">🚚 BOQ Supplier & Dealer Locator (Google Maps)</strong>
       <button onclick="closeMapModal()">✕ Close</button>
     </div>
     
     <div class="geo-controls">
-      <button class="primary" onclick="autoDetectLocation()">📡 Auto Detect GPS</button>
-      <span>Search Location:</span>
-      <input id="search-location-input" type="text" placeholder="Type city, area, or address..." value="Rajajinagar, Bangalore">
-      <button class="primary" onclick="searchTypedLocation()">🔍 Search Location</button>
+      <button class="primary" onclick="autoDetectLocation()">📡 Near My Location</button>
+      <span>Material Category:</span>
+      <select id="boq-material-filter" onchange="searchBoqSuppliers()" style="padding:6px; background:#0a1223; color:#fff; border:1px solid var(--line); border-radius:6px; font-size:12px;">
+        <option value="building material suppliers">All Building Materials</option>
+        <option value="cement dealers">Cement Dealers & Depots</option>
+        <option value="steel stockists TMT bars">TMT Steel Suppliers</option>
+        <option value="brick and AAC block suppliers">Bricks & AAC Blocks</option>
+        <option value="tile and granite showrooms">Tiles, Granite & Marble</option>
+        <option value="paint shops Asian Paints Berger">Paint & Coating Stores</option>
+        <option value="hardware and UPVC windows dealers">Doors, Windows & Hardware</option>
+      </select>
       
-      <span style="margin-left:auto;">Coordinates:</span>
-      <input id="gis-lat" type="number" step="0.0001" value="12.9716" style="width:85px; background:#0a1223; color:#fff; border:1px solid var(--line); border-radius:4px; padding:4px;">
-      <input id="gis-lng" type="number" step="0.0001" value="77.5946" style="width:85px; background:#0a1223; color:#fff; border:1px solid var(--line); border-radius:4px; padding:4px;">
-      <button onclick="updateMapCoords()">Sync</button>
+      <span>City / Area:</span>
+      <input id="search-location-input" type="text" placeholder="e.g. Rajajinagar, Bangalore" value="Rajajinagar, Bangalore">
+      <button class="primary" onclick="searchBoqSuppliers()">🔍 Search Suppliers</button>
     </div>
 
     <div class="map-view-frame">
@@ -329,8 +331,8 @@ let plan=null, zoom=1, showDims=true, showGrid=true, showWalls=true, showOpening
 let selectedRoomIndex = null;
 let currentViewMode = '2d';
 
-let siteLocationName = "Rajajinagar, Bangalore";
-let siteLat = 12.9716, siteLng = 77.5946;
+let userSearchArea = "Rajajinagar, Bangalore";
+let userLat = 12.9716, userLng = 77.5946;
 
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)), 
       nfmt=v=>Number(v||0).toLocaleString('en-IN',{maximumFractionDigits:1}), 
@@ -338,6 +340,7 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),
 
 const VENDOR_DB = {
   cement: {
+    query: "cement dealers",
     title: "Cement Sourcing (OPC/PPC 53 Grade)",
     offline: [
       { name: "Shankara Buildpro", location: "Rajajinagar & Yeshwanthpur Hub, Bangalore", phone: "1800-212-3311 / 080-40117777" },
@@ -349,6 +352,7 @@ const VENDOR_DB = {
     ]
   },
   steel: {
+    query: "steel stockists TMT bars",
     title: "TMT Rebars & Structural Fe550D Steel",
     offline: [
       { name: "Kamdhenu & JSW Authorised Stockist", location: "APMC Yard, Yeshwanthpur, Bangalore", phone: "+91 80 2347 1199" },
@@ -360,6 +364,7 @@ const VENDOR_DB = {
     ]
   },
   bricks: {
+    query: "brick and AAC block suppliers",
     title: "AAC Blocks & Red Wirecut Bricks",
     offline: [
       { name: "Bangalore Brick Works Depot", location: "Nelamangala Highway / Magadi Road", phone: "+91 98450 12890" },
@@ -370,6 +375,7 @@ const VENDOR_DB = {
     ]
   },
   flooring: {
+    query: "tile and granite showrooms",
     title: "Vitrified Tiles, Granite & Marble",
     offline: [
       { name: "Kajaria Tile World Grand Showroom", location: "Hosur Road / BTM Layout, Bangalore", phone: "+91 80 4110 5000" },
@@ -380,6 +386,7 @@ const VENDOR_DB = {
     ]
   },
   paint: {
+    query: "paint shops Asian Paints Berger",
     title: "Exterior Weathercoat & Luxury Emulsions",
     offline: [
       { name: "Asian Paints Colour Ideas Lounge", location: "Rajajinagar & Malleshwaram, Bangalore", phone: "+91 80 2334 5612" },
@@ -390,6 +397,7 @@ const VENDOR_DB = {
     ]
   },
   hardware: {
+    query: "hardware and UPVC windows dealers",
     title: "Doors, Windows, UPVC Glazing & Hardware",
     offline: [
       { name: "Fenesta Windows & Doors Experience Lounge", location: "Indiranagar 100ft Rd / Rajajinagar", phone: "+91 80 4125 1199" },
@@ -568,7 +576,7 @@ function render2D(){
   }
 
   svg.append(el('text',{x:pad,y:26,'font-size':13,fill:'#1e293b','font-weight':800},'ARCHFORM · CAD CONCEPT BLUEPRINT'));
-  svg.append(el('text',{x:pad,y:44,'font-size':10.5,fill:'#64748b'},`${W} × ${D} ft Plot · ${p.facing}-Facing · Geo: ${siteLocationName}`));
+  svg.append(el('text',{x:pad,y:44,'font-size':10.5,fill:'#64748b'},`${W} × ${D} ft Plot · ${p.facing}-Facing`));
   
   const dirs={North:[W/2,-1],South:[W/2,D+1],East:[W+1,D/2],West:[-1,D/2]}, [nx,ny]=dirs[p.facing];
   svg.append(el('text',{x:sx(nx),y:sy(ny),'text-anchor':'middle','font-size':13,fill:'#7c3aed','font-weight':800},{North:'N ↑',South:'S ↓',East:'E →',West:'← W'}[p.facing]));
@@ -578,7 +586,7 @@ function render2D(){
   updateBOQ();
 }
 
-// --- High-Fidelity 2D Architectural Elevation Generator (Matches Image) ---
+// --- High-Fidelity 2D Architectural Elevation Generator ---
 function renderFacade(){
   const cv = $('facadeCanvas');
   const ctx = cv.getContext('2d');
@@ -794,12 +802,6 @@ function renderFacade(){
   ctx.arc(bX - 45, groundY - 30, 24, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = '#fef08a';
-  ctx.beginPath();
-  ctx.arc(bX + 50, groundY - 2, 3, 0, Math.PI * 2);
-  ctx.arc(bX + 220, groundY - 2, 3, 0, Math.PI * 2);
-  ctx.fill();
-
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 13px system-ui';
   ctx.fillText('ARCHFORM 2D ELEVATION · CONTEMPORARY VILLA FACADE (1:100)', 40, 40);
@@ -886,7 +888,7 @@ function update3DModel(){
   pylon.position.set(-p.w * S / 2 + 1, floorHeight + 0.8, 0);
   buildingGroup.add(pylon);
 
-  plan.rooms.forEach((r, i)=>{
+  plan.rooms.forEach((r)=>{
     const rw = r.w * S;
     const rd = r.h * S;
     const rx = (r.x - p.w/2 + r.w/2) * S;
@@ -1073,7 +1075,10 @@ function updateBOQ(){
       <td>${nfmt(r.qty)} ${r.unit}</td>
       <td><input type="number" min="0" value="${r.rate}" aria-label="Rate for ${r.name}" data-rate="${i}"></td>
       <td>${cash(r.qty*r.rate)}</td>
-      <td><button class="small primary" onclick="showVendors('${r.key}')">🔍 Retailers & Contact</button></td>
+      <td>
+        <button class="small primary" onclick="showVendors('${r.key}')">📋 Direct Contacts</button>
+        <button class="small gis" onclick="locateSuppliersOnMap('${r.key}')">📍 Maps</button>
+      </td>
     `;
     $('boq').append(tr);
   });
@@ -1104,7 +1109,7 @@ window.showVendors = function(key){
   });
   html += `</div>`;
 
-  html += `<div><strong style="color:var(--cyan);">🌐 Online Portals & Direct Bulk:</strong>`;
+  html += `<div><strong style="color:var(--cyan);">🌐 Online Portals & Bulk Hubs:</strong>`;
   v.online.forEach(on=>{
     html += `<div style="margin-top:6px; background:#121b30; padding:6px; border-radius:6px;">
       <div><strong>${on.name}</strong></div>
@@ -1139,63 +1144,49 @@ function download(blob,name){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
-// --- Direct Google Maps Engine ---
+// --- BOQ Material Suppliers Google Maps Integration ---
 window.openMapModal=function(){
   $('mapModal').classList.add('active');
-  updateMapIframe();
+  searchBoqSuppliers();
 };
 window.closeMapModal=function(){
   $('mapModal').classList.remove('active');
 };
 
-window.searchTypedLocation = function(){
-  const query = $('search-location-input').value.trim();
-  if(!query) return;
-  siteLocationName = query;
-  $('gis-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=k&z=17&ie=UTF8&iwloc=&output=embed`;
-  $('siteLocStatus').innerText = `📍 ${siteLocationName}`;
-  render2D();
+window.locateSuppliersOnMap = function(materialKey){
+  const v = VENDOR_DB[materialKey];
+  if(v && v.query){
+    $('boq-material-filter').value = v.query;
+  }
+  openMapModal();
+};
+
+window.searchBoqSuppliers = function(){
+  const area = $('search-location-input').value.trim() || userSearchArea;
+  const materialType = $('boq-material-filter').value;
+  const query = `${materialType} near ${area}`;
+  $('gis-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=m&z=13&ie=UTF8&iwloc=&output=embed`;
 };
 
 window.autoDetectLocation = function(){
   if(navigator.geolocation){
-    $('siteLocStatus').innerText = "📡 Requesting device GPS...";
     navigator.geolocation.getCurrentPosition((pos)=>{
-      siteLat = pos.coords.latitude;
-      siteLng = pos.coords.longitude;
-      siteLocationName = `GPS: ${siteLat.toFixed(4)}° N, ${siteLng.toFixed(4)}° E`;
-      $('gis-lat').value = siteLat.toFixed(4);
-      $('gis-lng').value = siteLng.toFixed(4);
-      $('search-location-input').value = `${siteLat.toFixed(4)}, ${siteLng.toFixed(4)}`;
-      $('siteLocStatus').innerText = `📍 ${siteLocationName}`;
-      updateMapIframe();
-      render2D();
-    }, (err)=>{
-      alert("GPS Permission denied. Type your location or area in the input box instead.");
-      $('siteLocStatus').innerText = `📍 ${siteLocationName}`;
+      userLat = pos.coords.latitude;
+      userLng = pos.coords.longitude;
+      const materialType = $('boq-material-filter').value;
+      const query = `${materialType} near ${userLat.toFixed(4)},${userLng.toFixed(4)}`;
+      $('search-location-input').value = `${userLat.toFixed(4)}, ${userLng.toFixed(4)}`;
+      $('gis-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=m&z=13&ie=UTF8&iwloc=&output=embed`;
+    }, ()=>{
+      alert("GPS Permission denied. Type your area or city in the input box to find local suppliers.");
     });
   } else {
     alert("Geolocation is not supported by your browser.");
   }
 };
 
-window.updateMapCoords=function(){
-  siteLat = parseFloat($('gis-lat').value) || siteLat;
-  siteLng = parseFloat($('gis-lng').value) || siteLng;
-  siteLocationName = `${siteLat.toFixed(4)}° N, ${siteLng.toFixed(4)}° E`;
-  $('search-location-input').value = `${siteLat.toFixed(4)}, ${siteLng.toFixed(4)}`;
-  $('siteLocStatus').innerText = `📍 Synced: ${siteLocationName}`;
-  updateMapIframe();
-  render2D();
-};
-
-function updateMapIframe(){
-  const query = $('search-location-input').value.trim() || `${siteLat},${siteLng}`;
-  $('gis-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=k&z=17&ie=UTF8&iwloc=&output=embed`;
-}
-
 $('search-location-input').addEventListener('keydown', (e)=>{
-  if(e.key === 'Enter') searchTypedLocation();
+  if(e.key === 'Enter') searchBoqSuppliers();
 });
 
 $('walls').onclick=()=>{
@@ -1209,27 +1200,23 @@ $('openings').onclick=()=>{
   render2D();
 };
 
-// --- High-Resolution Presentation Photo Generator (Replaces broken browser print) ---
+// --- High-Resolution Presentation Photo Generator ---
 function exportPresentationPhoto() {
   if(!plan){ alert("Please generate a floor plan first."); return; }
 
   $('status').textContent = "Rendering high-resolution presentation photo...";
 
-  // 1. Ensure facade canvas is rendered
   renderFacade();
   const facadeCv = $('facadeCanvas');
 
-  // 2. Prepare 2400x1600 Master Canvas
   const outCv = document.createElement('canvas');
   outCv.width = 2400;
   outCv.height = 1600;
   const ctx = outCv.getContext('2d');
 
-  // Background
   ctx.fillStyle = '#090e1d';
   ctx.fillRect(0, 0, outCv.width, outCv.height);
 
-  // Outer Decorative CAD Border
   ctx.strokeStyle = '#2c3b58';
   ctx.lineWidth = 4;
   ctx.strokeRect(30, 30, outCv.width - 60, outCv.height - 60);
@@ -1237,14 +1224,12 @@ function exportPresentationPhoto() {
   ctx.lineWidth = 1.5;
   ctx.strokeRect(36, 36, outCv.width - 72, outCv.height - 72);
 
-  // Title Block Header Bar
   ctx.fillStyle = '#121b30';
   ctx.fillRect(40, 40, outCv.width - 80, 130);
   ctx.strokeStyle = '#2c3b58';
   ctx.lineWidth = 2;
   ctx.strokeRect(40, 40, outCv.width - 80, 130);
 
-  // Header Typography
   ctx.fillStyle = '#edf3ff';
   ctx.font = 'bold 38px system-ui';
   ctx.fillText('ARCHFORM ARCHITECTURAL SUITE', 80, 95);
@@ -1253,17 +1238,14 @@ function exportPresentationPhoto() {
   ctx.font = 'bold 16px system-ui';
   ctx.fillText('VERIFIED 2D BLUEPRINT · CONTEMPORARY VILLA ELEVATION · MATERIAL BOQ', 80, 130);
 
-  // Project Specs on Header Right
   const p = plan.settings;
   ctx.fillStyle = '#9cabc6';
   ctx.font = '16px system-ui';
   ctx.textAlign = 'right';
   ctx.fillText(`Plot Dimension: ${p.w} × ${p.d} ft (${p.w * p.d} sq.ft) | Facing: ${p.facing}`, outCv.width - 80, 80);
-  ctx.fillText(`Location: ${siteLocationName}`, outCv.width - 80, 108);
-  ctx.fillText(`Date: ${new Date().toLocaleDateString('en-IN')}`, outCv.width - 80, 136);
+  ctx.fillText(`Date: ${new Date().toLocaleDateString('en-IN')}`, outCv.width - 80, 110);
   ctx.textAlign = 'left';
 
-  // Section 1: Draw 2D Floor Plan SVG onto Canvas
   const planSvg = $('canvas').querySelector('svg');
   const svgData = new XMLSerializer().serializeToString(planSvg);
   const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
@@ -1271,7 +1253,6 @@ function exportPresentationPhoto() {
   const planImg = new Image();
 
   planImg.onload = () => {
-    // Floor Plan Card
     ctx.fillStyle = '#121b30';
     ctx.fillRect(50, 190, 1120, 840);
     ctx.strokeStyle = '#2c3b58';
@@ -1283,7 +1264,6 @@ function exportPresentationPhoto() {
     ctx.fillText('1. GROUND CONCEPT FLOOR PLAN (1:100)', 70, 230);
     ctx.drawImage(planImg, 70, 250, 1080, 750);
 
-    // Section 2: Draw Elevation Facade Image
     ctx.fillStyle = '#121b30';
     ctx.fillRect(1200, 190, 1150, 840);
     ctx.strokeStyle = '#2c3b58';
@@ -1295,7 +1275,6 @@ function exportPresentationPhoto() {
     ctx.fillText('2. FRONT 2D ARCHITECTURAL ELEVATION', 1220, 230);
     ctx.drawImage(facadeCv, 1220, 250, 1110, 750);
 
-    // Section 3: Material BOQ Table (Bottom Strip)
     ctx.fillStyle = '#121b30';
     ctx.fillRect(50, 1050, outCv.width - 100, 480);
     ctx.strokeStyle = '#2c3b58';
@@ -1306,7 +1285,6 @@ function exportPresentationPhoto() {
     ctx.font = 'bold 20px system-ui';
     ctx.fillText('3. MATERIAL ESTIMATE & QUANTITIES (BOQ)', 70, 1095);
 
-    // Table Header
     ctx.fillStyle = '#18243d';
     ctx.fillRect(70, 1115, outCv.width - 140, 40);
     ctx.fillStyle = '#9cabc6';
@@ -1316,7 +1294,6 @@ function exportPresentationPhoto() {
     ctx.fillText('Unit Rate (₹)', 1400, 1142);
     ctx.fillText('Total Forecast Amount', 1950, 1142);
 
-    // Table Rows
     const data = materialData();
     data.forEach((r, idx) => {
       let rowY = 1185 + idx * 42;
@@ -1331,7 +1308,6 @@ function exportPresentationPhoto() {
       ctx.fillText(cash(r.qty * r.rate), 1950, rowY);
     });
 
-    // Grand Total Bar
     const cost = totalCost();
     const botY = 1465;
     ctx.fillStyle = '#1e293b';
@@ -1343,7 +1319,6 @@ function exportPresentationPhoto() {
     ctx.fillText(`ESTIMATED STRUCTURAL TOTAL: ${cash(cost.total)}`, outCv.width - 100, botY + 28);
     ctx.textAlign = 'left';
 
-    // Download generated photo
     outCv.toBlob((blob) => {
       download(blob, 'archform-presentation-sheet.png');
       URL.revokeObjectURL(svgUrl);
@@ -1356,7 +1331,7 @@ function exportPresentationPhoto() {
 
 // --- Event Wiring ---
 $('pdf').onclick = exportPresentationPhoto;
-$('openMap').onclick=window.openMapModal;
+$('openBoqMap').onclick=window.openMapModal;
 $('generate').onclick=generate;
 $('regenerate').onclick=generate;
 document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{
@@ -1366,7 +1341,7 @@ document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{
 
 $('save').onclick=()=>{
   if(!plan){$('status').textContent='Generate a plan first.';return;}
-  download(new Blob([JSON.stringify({app:'Archform',version:5,plan,rates,labour:$('labour').value,site:{name:siteLocationName,lat:siteLat,lng:siteLng}},null,2)],{type:'application/json'}),'archform-plan.json');
+  download(new Blob([JSON.stringify({app:'Archform',version:5,plan,rates,labour:$('labour').value},null,2)],{type:'application/json'}),'archform-plan.json');
 };
 
 $('open').onclick = () => { $('file').click(); };
@@ -1381,12 +1356,6 @@ $('file').onchange = (e) => {
       if(!data.plan || !data.plan.settings || !Array.isArray(data.plan.rooms)) throw new Error();
       plan = data.plan;
       rates = Array.isArray(data.rates) ? data.rates : rates;
-      if(data.site){
-        siteLocationName = data.site.name || siteLocationName;
-        siteLat = data.site.lat || siteLat;
-        siteLng = data.site.lng || siteLng;
-        $('siteLocStatus').innerText = `📍 ${siteLocationName}`;
-      }
       const p = plan.settings;
       $('w').value = p.w;
       $('d').value = p.d;
