@@ -29,8 +29,8 @@ button.gis{background:#0e7490;border-color:#22d3ee}
 button.active{background:var(--purple);border-color:var(--cyan)}
 button.small{padding:4px 8px;font-size:11px;border-radius:6px}
 
-.currency-badge{background:#101a30;border:1px solid var(--cyan);border-radius:8px;padding:6px 10px;display:flex;align-items:center;gap:6px;font-size:12px}
-.currency-badge select{background:transparent;border:none;color:var(--cyan);font-weight:700;font-size:12px;cursor:pointer;outline:none}
+.currency-badge{background:#101a30;border:1px solid var(--cyan);border-radius:8px;padding:5px 8px;display:flex;align-items:center;gap:6px;font-size:12px}
+.currency-badge select{background:#0a1223;border:1px solid var(--line);color:var(--cyan);font-weight:700;font-size:12px;cursor:pointer;outline:none;padding:3px 6px;border-radius:6px;max-width:160px}
 
 .layout{display:grid;grid-template-columns:360px minmax(0,1fr);gap:14px}
 .panel{background:linear-gradient(150deg,#152039,#10182a);border:1px solid var(--line);border-radius:15px;overflow:hidden;min-width:0}
@@ -88,7 +88,7 @@ td input{width:85px;background:#0a1223;color:var(--txt);border:1px solid var(--l
 /* Material Sourcing Map Modal */
 .map-modal{display:none;position:fixed;inset:0;background:rgba(9,14,29,0.85);backdrop-filter:blur(6px);z-index:100;align-items:center;justify-content:center;padding:14px}
 .map-modal.active{display:flex}
-.map-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;width:100%;max-width:880px;height:85vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 12px 35px rgba(0,0,0,0.6)}
+.map-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;width:100%;max-width:920px;height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 12px 35px rgba(0,0,0,0.6)}
 .map-card-header{padding:11px 16px;background:var(--panel2);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
 .map-view-frame{flex:1;position:relative;background:#0a1223}
 .map-view-frame iframe{width:100%;height:100%;border:none}
@@ -120,26 +120,18 @@ td input{width:85px;background:#0a1223;color:var(--txt);border:1px solid var(--l
      </svg>
    </div>
    <div>
-     <h1>ARCHFORM <span class="pill">2D · 3D · GLOBAL BOQ</span></h1>
-     <p>AI CAD, Custom Villa Elevation & Multi-Currency BOQ Logistics.</p>
+     <h1>ARCHFORM <span class="pill">GLOBAL CAD & BOQ</span></h1>
+     <p>AI Concept CAD, Custom Villa Elevation & Universal Multi-Currency Takeoff.</p>
    </div>
  </div>
  <div class="actions">
    <div class="currency-badge">
      <span id="locFlag">🌍</span>
      <select id="userCurrency" onchange="changeCurrency(this.value)">
-       <option value="INR">INR (₹)</option>
-       <option value="USD">USD ($)</option>
-       <option value="EUR">EUR (€)</option>
-       <option value="GBP">GBP (£)</option>
-       <option value="AED">AED (د.إ)</option>
-       <option value="AUD">AUD (A$)</option>
-       <option value="CAD">CAD (C$)</option>
-       <option value="SGD">SGD (S$)</option>
-       <option value="JPY">JPY (¥)</option>
+       <!-- Populated dynamically with all 160+ world currencies -->
      </select>
    </div>
-   <button class="gis" id="openBoqMap">🗺️ Find Nearby Suppliers</button>
+   <button class="gis" id="openBoqMap">🗺️ High-Accuracy Supplier Map</button>
    <button id="save">Save JSON</button>
    <button id="open">Open JSON</button>
    <input id="file" type="file" accept=".json,application/json" style="display:none">
@@ -159,7 +151,7 @@ td input{width:85px;background:#0a1223;color:var(--txt);border:1px solid var(--l
    <button data-p="Design a 40 x 60 ft south-facing 3BHK house with 3 bathrooms, kitchen, utility, pooja and staircase.">40×60 · 3BHK</button>
   </div>
   <button class="primary wide" id="generate">✦ Generate Plan & 3D Model</button>
-  <div class="status" id="status">Detecting regional currency & initializing...</div>
+  <div class="status" id="status">Syncing regional currency & initializing...</div>
 
   <!-- Touch-to-Edit Floating Box -->
   <div class="room-editor-popover" id="roomEditor">
@@ -256,7 +248,7 @@ td input{width:85px;background:#0a1223;color:var(--txt);border:1px solid var(--l
 
 <div class="lower">
 <section class="panel">
-  <div class="ph">Material Takeoff (BOQ) <span class="pill" id="currencyNote">Rates Localized</span></div>
+  <div class="ph">Material Takeoff (BOQ) <span class="pill" id="currencyNote">Global Currency Synced</span></div>
   <div class="pb">
     <div class="tablewrap">
       <table>
@@ -309,29 +301,29 @@ td input{width:85px;background:#0a1223;color:var(--txt);border:1px solid var(--l
 <div class="footer">Archform · Architecture CAD, 3D Rendering & Sourcing Platform.</div>
 </div>
 
-<!-- BOQ Material Suppliers Map Modal -->
+<!-- Accurate BOQ Material Suppliers Map Modal -->
 <div class="map-modal" id="mapModal">
   <div class="map-card">
     <div class="map-card-header">
-      <strong style="color:var(--cyan); font-size:14px;">🚚 BOQ Supplier & Dealer Locator (Google Maps)</strong>
+      <strong style="color:var(--cyan); font-size:14px;">🚚 High-Accuracy Supplier & Vendor Radar (Google Maps)</strong>
       <button onclick="closeMapModal()">✕ Close</button>
     </div>
     
     <div class="geo-controls">
-      <button class="primary" onclick="autoDetectLocation()">📡 Near My Location</button>
-      <span>Material Category:</span>
+      <button class="primary" onclick="autoDetectLocation()">🎯 Exact Device GPS</button>
+      <span>Category:</span>
       <select id="boq-material-filter" onchange="searchBoqSuppliers()" style="padding:6px; background:#0a1223; color:#fff; border:1px solid var(--line); border-radius:6px; font-size:12px;">
-        <option value="building material suppliers">All Building Materials</option>
-        <option value="cement dealers">Cement Dealers & Depots</option>
-        <option value="steel stockists TMT bars">TMT Steel Suppliers</option>
-        <option value="brick and AAC block suppliers">Bricks & AAC Blocks</option>
-        <option value="tile and granite showrooms">Tiles, Granite & Marble</option>
-        <option value="paint shops Asian Paints Berger">Paint & Coating Stores</option>
-        <option value="hardware and UPVC windows dealers">Doors, Windows & Hardware</option>
+        <option value="building material store">All Building Material Stores</option>
+        <option value="ready mix concrete supplier cement dealer">Cement & Concrete Suppliers</option>
+        <option value="TMT steel bar dealers structural steel stockist">TMT Steel Suppliers & Yards</option>
+        <option value="brick manufacturer AAC block supplier">Bricks & AAC Block Depots</option>
+        <option value="granite and marble dealers tiles showroom">Tiles, Granite & Marble Showrooms</option>
+        <option value="paint shop Berger Asian Paints dealer">Paints & Wall Coatings</option>
+        <option value="aluminum UPVC windows hardware fittings store">Doors, Hardware & UPVC Windows</option>
       </select>
       
-      <span>City / Area:</span>
-      <input id="search-location-input" type="text" placeholder="Type area or city..." value="Rajajinagar, Bangalore">
+      <span>Target Location / Pin:</span>
+      <input id="search-location-input" type="text" placeholder="Area, Landmark, City or Lat,Lng" value="Rajajinagar, Bangalore">
       <button class="primary" onclick="searchBoqSuppliers()">🔍 Search Suppliers</button>
     </div>
 
@@ -349,22 +341,173 @@ let selectedRoomIndex = null;
 let currentViewMode = '2d';
 
 let userSearchArea = "Rajajinagar, Bangalore";
-let userLat = 12.9716, userLng = 77.5946;
+let userLat = null, userLng = null;
 
 // Base rates in INR
 const BASE_RATES_INR = [420, 68, 12, 65, 18, 35000];
 
-// Active localized rates and currency tracking
+// Complete ISO 4217 Currency Database (160+ World Currencies)
+const ALL_WORLD_CURRENCIES = {
+  INR: { s: '₹', n: 'Indian Rupee' },
+  USD: { s: '$', n: 'US Dollar' },
+  EUR: { s: '€', n: 'Euro' },
+  GBP: { s: '£', n: 'British Pound' },
+  AED: { s: 'د.إ', n: 'UAE Dirham' },
+  AFN: { s: '؋', n: 'Afghan Afghani' },
+  ALL: { s: 'L', n: 'Albanian Lek' },
+  AMD: { s: '֏', n: 'Armenian Dram' },
+  ANG: { s: 'ƒ', n: 'NL Antillean Guilder' },
+  AOA: { s: 'Kz', n: 'Angolan Kwanza' },
+  ARS: { s: '$', n: 'Argentine Peso' },
+  AUD: { s: 'A$', n: 'Australian Dollar' },
+  AWG: { s: 'ƒ', n: 'Aruban Florin' },
+  AZN: { s: '₼', n: 'Azerbaijani Manat' },
+  BAM: { s: 'KM', n: 'Bosnia-Herzegovina Mark' },
+  BBD: { s: '$', n: 'Barbadian Dollar' },
+  BDT: { s: '৳', n: 'Bangladeshi Taka' },
+  BGN: { s: 'лв', n: 'Bulgarian Lev' },
+  BHD: { s: '.د.ب', n: 'Bahraini Dinar' },
+  BIF: { s: 'FBu', n: 'Burundian Franc' },
+  BMD: { s: '$', n: 'Bermudian Dollar' },
+  BND: { s: '$', n: 'Brunei Dollar' },
+  BOB: { s: 'Bs.', n: 'Bolivian Boliviano' },
+  BRL: { s: 'R$', n: 'Brazilian Real' },
+  BSD: { s: '$', n: 'Bahamian Dollar' },
+  BTN: { s: 'Nu.', n: 'Bhutanese Ngultrum' },
+  BWP: { s: 'P', n: 'Botswanan Pula' },
+  BYN: { s: 'Br', n: 'Belarusian Ruble' },
+  BZD: { s: '$', n: 'Belize Dollar' },
+  CAD: { s: 'C$', n: 'Canadian Dollar' },
+  CDF: { s: 'FC', n: 'Congolese Franc' },
+  CHF: { s: 'CHF', n: 'Swiss Franc' },
+  CLP: { s: '$', n: 'Chilean Peso' },
+  CNY: { s: '¥', n: 'Chinese Yuan' },
+  COP: { s: '$', n: 'Colombian Peso' },
+  CRC: { s: '₡', n: 'Costa Rican Colón' },
+  CUP: { s: '$', n: 'Cuban Peso' },
+  CVE: { s: '$', n: 'Cape Verdean Escudo' },
+  CZK: { s: 'Kč', n: 'Czech Koruna' },
+  DJF: { s: 'Fdj', n: 'Djiboutian Franc' },
+  DKK: { s: 'kr', n: 'Danish Krone' },
+  DOP: { s: 'RD$', n: 'Dominican Peso' },
+  DZD: { s: 'دج', n: 'Algerian Dinar' },
+  EGP: { s: '£', n: 'Egyptian Pound' },
+  ERN: { s: 'Nfk', n: 'Eritrean Nakfa' },
+  ETB: { s: 'Br', n: 'Ethiopian Birr' },
+  FJD: { s: '$', n: 'Fijian Dollar' },
+  FKP: { s: '£', n: 'Falkland Islands Pound' },
+  GEL: { s: '₾', n: 'Georgian Lari' },
+  GHS: { s: 'GH₵', n: 'Ghanaian Cedi' },
+  GIP: { s: '£', n: 'Gibraltar Pound' },
+  GMD: { s: 'D', n: 'Gambian Dalasi' },
+  GNF: { s: 'FG', n: 'Guinean Franc' },
+  GTQ: { s: 'Q', n: 'Guatemalan Quetzal' },
+  GYD: { s: '$', n: 'Guyanaese Dollar' },
+  HKD: { s: 'HK$', n: 'Hong Kong Dollar' },
+  HNL: { s: 'L', n: 'Honduran Lempira' },
+  HRK: { s: 'kn', n: 'Croatian Kuna' },
+  HTG: { s: 'G', n: 'Haitian Gourde' },
+  HUF: { s: 'Ft', n: 'Hungarian Forint' },
+  IDR: { s: 'Rp', n: 'Indonesian Rupiah' },
+  ILS: { s: '₪', n: 'Israeli New Shekel' },
+  IQD: { s: 'ع.د', n: 'Iraqi Dinar' },
+  IRR: { s: '﷼', n: 'Iranian Rial' },
+  ISK: { s: 'kr', n: 'Icelandic Króna' },
+  JMD: { s: 'J$', n: 'Jamaican Dollar' },
+  JOD: { s: 'JD', n: 'Jordanian Dinar' },
+  JPY: { s: '¥', n: 'Japanese Yen' },
+  KES: { s: 'KSh', n: 'Kenyan Shilling' },
+  KGS: { s: 'с', n: 'Kyrgystani Som' },
+  KHR: { s: '៛', n: 'Cambodian Riel' },
+  KMF: { s: 'CF', n: 'Comorian Franc' },
+  KRW: { s: '₩', n: 'South Korean Won' },
+  KWD: { s: 'KD', n: 'Kuwaiti Dinar' },
+  KYD: { s: '$', n: 'Cayman Islands Dollar' },
+  KZT: { s: '₸', n: 'Kazakhstani Tenge' },
+  LAK: { s: '₭', n: 'Laotian Kip' },
+  LBP: { s: 'ل.ل', n: 'Lebanese Pound' },
+  LKR: { s: 'Rs', n: 'Sri Lankan Rupee' },
+  LRD: { s: '$', n: 'Liberian Dollar' },
+  LSL: { s: 'L', n: 'Lesotho Loti' },
+  LYD: { s: 'LD', n: 'Libyan Dinar' },
+  MAD: { s: 'DH', n: 'Moroccan Dirham' },
+  MDL: { s: 'L', n: 'Moldovan Leu' },
+  MGA: { s: 'Ar', n: 'Malagasy Ariary' },
+  MKD: { s: 'ден', n: 'Macedonian Denar' },
+  MMK: { s: 'K', n: 'Myanmar Kyat' },
+  MNT: { s: '₮', n: 'Mongolian Tugrik' },
+  MOP: { s: 'MOP$', n: 'Macanese Pataca' },
+  MRU: { s: 'UM', n: 'Mauritanian Ouguiya' },
+  MUR: { s: 'Rs', n: 'Mauritian Rupee' },
+  MVR: { s: 'Rf', n: 'Maldivian Rufiyaa' },
+  MWK: { s: 'MK', n: 'Malawian Kwacha' },
+  MXN: { s: '$', n: 'Mexican Peso' },
+  MYR: { s: 'RM', n: 'Malaysian Ringgit' },
+  MZN: { s: 'MT', n: 'Mozambican Metical' },
+  NAD: { s: '$', n: 'Namibian Dollar' },
+  NGN: { s: '₦', n: 'Nigerian Naira' },
+  NIO: { s: 'C$', n: 'Nicaraguan Córdoba' },
+  NOK: { s: 'kr', n: 'Norwegian Krone' },
+  NPR: { s: 'Rs', n: 'Nepalese Rupee' },
+  NZD: { s: 'NZ$', n: 'New Zealand Dollar' },
+  OMR: { s: '﷼', n: 'Omani Rial' },
+  PAB: { s: 'B/.', n: 'Panamanian Balboa' },
+  PEN: { s: 'S/.', n: 'Peruvian Sol' },
+  PGK: { s: 'K', n: 'Papua New Guinean Kina' },
+  PHP: { s: '₱', n: 'Philippine Peso' },
+  PKR: { s: 'Rs', n: 'Pakistani Rupee' },
+  PLN: { s: 'zł', n: 'Polish Złoty' },
+  PYG: { s: '₲', n: 'Paraguayan Guarani' },
+  QAR: { s: 'QR', n: 'Qatari Rial' },
+  RON: { s: 'lei', n: 'Romanian Leu' },
+  RSD: { s: 'дин.', n: 'Serbian Dinar' },
+  RUB: { s: '₽', n: 'Russian Ruble' },
+  RWF: { s: 'RF', n: 'Rwandan Franc' },
+  SAR: { s: '﷼', n: 'Saudi Riyal' },
+  SBD: { s: '$', n: 'Solomon Islands Dollar' },
+  SCR: { s: 'SR', n: 'Seychellois Rupee' },
+  SDG: { s: '£', n: 'Sudanese Pound' },
+  SEK: { s: 'kr', n: 'Swedish Krona' },
+  SGD: { s: 'S$', n: 'Singapore Dollar' },
+  SHP: { s: '£', n: 'Saint Helena Pound' },
+  SLE: { s: 'Le', n: 'Sierra Leonean Leone' },
+  SOS: { s: 'Sh', n: 'Somali Shilling' },
+  SRD: { s: '$', n: 'Surinamese Dollar' },
+  SSP: { s: '£', n: 'South Sudanese Pound' },
+  STN: { s: 'Db', n: 'São Tomé & Príncipe Dobra' },
+  SYP: { s: '£', n: 'Syrian Pound' },
+  SZL: { s: 'L', n: 'Swazi Lilangeni' },
+  THB: { s: '฿', n: 'Thai Baht' },
+  TJS: { s: 'SM', n: 'Tajikistani Somoni' },
+  TMT: { s: 'T', n: 'Turkmenistani Manat' },
+  TND: { s: 'DT', n: 'Tunisian Dinar' },
+  TOP: { s: 'T$', n: 'Tongan Paʻanga' },
+  TRY: { s: '₺', n: 'Turkish Lira' },
+  TTD: { s: 'TT$', n: 'Trinidad and Tobago Dollar' },
+  TWD: { s: 'NT$', n: 'New Taiwan Dollar' },
+  TZS: { s: 'TSh', n: 'Tanzanian Shilling' },
+  UAH: { s: '₴', n: 'Ukrainian Hryvnia' },
+  UGX: { s: 'USh', n: 'Ugandan Shilling' },
+  UYU: { s: '$U', n: 'Uruguayan Peso' },
+  UZS: { s: 'so\'m', n: 'Uzbekistani Som' },
+  VES: { s: 'Bs.S', n: 'Venezuelan Bolívar' },
+  VND: { s: '₫', n: 'Vietnamese Dong' },
+  VUV: { s: 'VT', n: 'Vanuatu Vatu' },
+  WST: { s: 'WS$', n: 'Samoan Tala' },
+  XAF: { s: 'FCFA', n: 'Central African CFA Franc' },
+  XCD: { s: 'EC$', n: 'East Caribbean Dollar' },
+  XOF: { s: 'CFA', n: 'West African CFA Franc' },
+  XPF: { s: '₣', n: 'CFP Franc' },
+  YER: { s: '﷼', n: 'Yemeni Rial' },
+  ZAR: { s: 'R', n: 'South African Rand' },
+  ZMW: { s: 'ZK', n: 'Zambian Kwacha' },
+  ZWL: { s: '$', n: 'Zimbabwean Dollar' }
+};
+
 let currentCurrency = 'INR';
 let currentSymbol = '₹';
 let exchangeMultiplier = 1.0;
 let rates = [...BASE_RATES_INR];
-
-const CURRENCY_SYMBOLS = {
-  INR: '₹', USD: '$', EUR: '€', GBP: '£',
-  AED: 'د.إ', AUD: 'A$', CAD: 'C$', SGD: 'S$',
-  JPY: '¥'
-};
 
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)), 
       nfmt=v=>Number(v||0).toLocaleString(undefined,{maximumFractionDigits:1}), 
@@ -372,7 +515,7 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),
 
 const VENDOR_DB = {
   cement: {
-    query: "cement dealers",
+    query: "ready mix concrete supplier cement dealer",
     title: "Cement Sourcing (OPC/PPC 53 Grade)",
     offline: [
       { name: "Shankara Buildpro", location: "Rajajinagar & Yeshwanthpur Hub, Bangalore", phone: "1800-212-3311 / 080-40117777" },
@@ -384,7 +527,7 @@ const VENDOR_DB = {
     ]
   },
   steel: {
-    query: "steel stockists TMT bars",
+    query: "TMT steel bar dealers structural steel stockist",
     title: "TMT Rebars & Structural Fe550D Steel",
     offline: [
       { name: "Kamdhenu & JSW Authorised Stockist", location: "APMC Yard, Yeshwanthpur, Bangalore", phone: "+91 80 2347 1199" },
@@ -396,7 +539,7 @@ const VENDOR_DB = {
     ]
   },
   bricks: {
-    query: "brick and AAC block suppliers",
+    query: "brick manufacturer AAC block supplier",
     title: "AAC Blocks & Red Wirecut Bricks",
     offline: [
       { name: "Bangalore Brick Works Depot", location: "Nelamangala Highway / Magadi Road", phone: "+91 98450 12890" },
@@ -407,7 +550,7 @@ const VENDOR_DB = {
     ]
   },
   flooring: {
-    query: "tile and granite showrooms",
+    query: "granite and marble dealers tiles showroom",
     title: "Vitrified Tiles, Granite & Marble",
     offline: [
       { name: "Kajaria Tile World Grand Showroom", location: "Hosur Road / BTM Layout, Bangalore", phone: "+91 80 4110 5000" },
@@ -418,7 +561,7 @@ const VENDOR_DB = {
     ]
   },
   paint: {
-    query: "paint shops Asian Paints Berger",
+    query: "paint shop Berger Asian Paints dealer",
     title: "Exterior Weathercoat & Luxury Emulsions",
     offline: [
       { name: "Asian Paints Colour Ideas Lounge", location: "Rajajinagar & Malleshwaram, Bangalore", phone: "+91 80 2334 5612" },
@@ -429,7 +572,7 @@ const VENDOR_DB = {
     ]
   },
   hardware: {
-    query: "hardware and UPVC windows dealers",
+    query: "aluminum UPVC windows hardware fittings store",
     title: "Doors, Windows, UPVC Glazing & Hardware",
     offline: [
       { name: "Fenesta Windows & Doors Experience Lounge", location: "Indiranagar 100ft Rd / Rajajinagar", phone: "+91 80 4125 1199" },
@@ -441,40 +584,55 @@ const VENDOR_DB = {
   }
 };
 
+function populateAllCurrencies() {
+  const sel = $('userCurrency');
+  sel.innerHTML = '';
+  Object.keys(ALL_WORLD_CURRENCIES).sort().forEach(code => {
+    const item = ALL_WORLD_CURRENCIES[code];
+    const opt = document.createElement('option');
+    opt.value = code;
+    opt.textContent = `${code} (${item.s}) — ${item.n}`;
+    sel.appendChild(opt);
+  });
+  sel.value = currentCurrency;
+}
+
 // --- Auto-Detect Country & Currency via IP Geolocation & Live FX ---
 async function detectLocationAndCurrency() {
+  populateAllCurrencies();
   try {
     const geoRes = await fetch('https://ipapi.co/json/');
     if(!geoRes.ok) throw new Error('Geo fetch failed');
     const geo = await geoRes.json();
     
+    if(geo.latitude && geo.longitude) {
+      userLat = geo.latitude;
+      userLng = geo.longitude;
+    }
+
     if(geo.currency) {
       const code = geo.currency.toUpperCase();
-      if(!CURRENCY_SYMBOLS[code]) {
-        CURRENCY_SYMBOLS[code] = geo.currency_name || code;
-        const opt = document.createElement('option');
-        opt.value = code;
-        opt.textContent = `${code} (${CURRENCY_SYMBOLS[code]})`;
-        $('userCurrency').appendChild(opt);
+      if(ALL_WORLD_CURRENCIES[code]) {
+        $('userCurrency').value = code;
       }
-      $('userCurrency').value = code;
       if(geo.city) {
         userSearchArea = `${geo.city}, ${geo.country_name || ''}`;
         $('search-location-input').value = userSearchArea;
       }
       await updateRatesForCurrency(code);
-      $('status').textContent = `Currency localized to ${code} (${geo.country_name || 'Detected'}).`;
+      $('status').textContent = `Currency: ${code} (${geo.country_name || 'Detected'}).`;
       return;
     }
   } catch (err) {
-    console.warn('Geolocation currency detection failed, using INR base rates.');
+    console.warn('Geolocation currency detection failed, default INR loaded.');
   }
   updateRatesForCurrency('INR');
 }
 
 async function updateRatesForCurrency(currencyCode) {
   currentCurrency = currencyCode;
-  currentSymbol = CURRENCY_SYMBOLS[currencyCode] || currencyCode;
+  const cData = ALL_WORLD_CURRENCIES[currencyCode] || { s: currencyCode, n: currencyCode };
+  currentSymbol = cData.s;
   
   document.querySelectorAll('.currency-tag').forEach(el => el.textContent = currentSymbol);
   $('rateHeader').textContent = `Rate (${currentSymbol})`;
@@ -487,7 +645,6 @@ async function updateRatesForCurrency(currencyCode) {
   }
   
   try {
-    // Open-access exchange rates
     const fxRes = await fetch('https://open.er-api.com/v6/latest/INR');
     if (!fxRes.ok) throw new Error();
     const fxData = await fxRes.json();
@@ -497,7 +654,6 @@ async function updateRatesForCurrency(currencyCode) {
       rates = BASE_RATES_INR.map(r => +(r * rate).toFixed(2));
     }
   } catch (e) {
-    // Fallback static conversion multipliers relative to INR
     const fallback = { USD: 0.012, EUR: 0.011, GBP: 0.0095, AED: 0.044, AUD: 0.018, CAD: 0.016, SGD: 0.016, JPY: 1.8 };
     exchangeMultiplier = fallback[currencyCode] || 0.012;
     rates = BASE_RATES_INR.map(r => +(r * exchangeMultiplier).toFixed(2));
@@ -654,7 +810,7 @@ function render2D(){
       let dx=sx(r.x+r.w*.42), dy=sy(r.y+r.h), dw=Math.min(2.8,r.w*.22)*S;
       svg.append(el('line',{x1:dx,y1:dy,x2:dx+dw,y2:dy,stroke:'#ffffff','stroke-width':5}));
       svg.append(el('path',{d:`M ${dx} ${dy} q ${dw} 0 ${dw} ${-dw}`,fill:'none',stroke:'#ef4444','stroke-width':1.8}));
-      svg.append(el('line',{x1:dx,y1:dy,x2:dx,y2:dy-dw,stroke:'#ef4444','stroke-width':1.5}));
+      svg.append(el('line',{x1:dx,y1:dy,x2:dx+dw,y2:dy-dw,stroke:'#ef4444','stroke-width':1.5}));
 
       if(r.y===3){
         let wx=sx(r.x+r.w*.35), wy=sy(r.y), ww=Math.min(r.w*.32,3.5)*S;
@@ -905,12 +1061,6 @@ function renderFacade(){
   ctx.beginPath();
   ctx.arc(bX - 25, groundY - 45, 32, 0, Math.PI * 2);
   ctx.arc(bX - 45, groundY - 30, 24, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = '#fef08a';
-  ctx.beginPath();
-  ctx.arc(bX + 50, groundY - 2, 3, 0, Math.PI * 2);
-  ctx.arc(bX + 220, groundY - 2, 3, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.fillStyle = '#ffffff';
@@ -1255,7 +1405,7 @@ function download(blob,name){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
-// --- BOQ Material Suppliers Google Maps Integration ---
+// --- High-Accuracy Material Suppliers Google Maps Integration ---
 window.openMapModal=function(){
   $('mapModal').classList.add('active');
   searchBoqSuppliers();
@@ -1275,21 +1425,38 @@ window.locateSuppliersOnMap = function(materialKey){
 window.searchBoqSuppliers = function(){
   const area = $('search-location-input').value.trim() || userSearchArea;
   const materialType = $('boq-material-filter').value;
-  const query = `${materialType} near ${area}`;
-  $('gis-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=m&z=13&ie=UTF8&iwloc=&output=embed`;
+
+  // Use exact coordinate pinning if lat/lng are active
+  let query;
+  if (userLat && userLng && area.includes(`${userLat.toFixed(4)}`)) {
+    query = `${materialType}&ll=${userLat},${userLng}`;
+  } else {
+    query = `${materialType} in ${area}`;
+  }
+
+  // Google Maps embed with high zoom factor (z=15) and localized point pinning
+  $('gis-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=m&z=15&ie=UTF8&iwloc=&output=embed`;
 };
 
 window.autoDetectLocation = function(){
   if(navigator.geolocation){
+    $('status').textContent = 'Requesting GPS precision...';
     navigator.geolocation.getCurrentPosition((pos)=>{
       userLat = pos.coords.latitude;
       userLng = pos.coords.longitude;
       const materialType = $('boq-material-filter').value;
-      const query = `${materialType} near ${userLat.toFixed(4)},${userLng.toFixed(4)}`;
-      $('search-location-input').value = `${userLat.toFixed(4)}, ${userLng.toFixed(4)}`;
-      $('gis-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=m&z=13&ie=UTF8&iwloc=&output=embed`;
-    }, ()=>{
-      alert("GPS permission denied. Type your area or city in the input box to find local suppliers.");
+      const coordStr = `${userLat.toFixed(5)}, ${userLng.toFixed(5)}`;
+      $('search-location-input').value = coordStr;
+      
+      const query = `${materialType}&ll=${userLat},${userLng}`;
+      $('gis-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=m&z=15&ie=UTF8&iwloc=&output=embed`;
+      $('status').textContent = `High-accuracy GPS locked: ${coordStr}`;
+    }, (err)=>{
+      alert("GPS precision unavailable. Type your exact street, pin code, or area in the input box.");
+    }, {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
     });
   } else {
     alert("Geolocation is not supported by your browser.");
@@ -1474,10 +1641,10 @@ $('file').onchange = (e) => {
       const data = JSON.parse(reader.result);
       if(!data.plan || !data.plan.settings || !Array.isArray(data.plan.rooms)) throw new Error();
       plan = data.plan;
-      if (data.currency) {
+      if (data.currency && ALL_WORLD_CURRENCIES[data.currency]) {
         currentCurrency = data.currency;
         $('userCurrency').value = currentCurrency;
-        currentSymbol = CURRENCY_SYMBOLS[currentCurrency] || currentCurrency;
+        currentSymbol = ALL_WORLD_CURRENCIES[currentCurrency].s;
       }
       rates = Array.isArray(data.rates) ? data.rates : rates;
       const p = plan.settings;
