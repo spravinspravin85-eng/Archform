@@ -21,13 +21,16 @@ body{margin:0;background:radial-gradient(900px 450px at 80% -15%,#30315f,transpa
 .logo-wrap svg{width:100%;height:100%;display:block}
 .brand h1{font-size:20px;margin:0;letter-spacing:1px}
 .brand p{margin:1px 0 0;color:var(--muted);font-size:12px}
-.actions,.toolbar{display:flex;gap:7px;flex-wrap:wrap}
-button{border:1px solid var(--line);background:#202d48;color:var(--txt);padding:8px 12px;border-radius:10px;font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:0.15s ease}
-button:hover{border-color:var(--cyan);background:#28385a}
+.actions,.toolbar{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+button, select.currency-select{border:1px solid var(--line);background:#202d48;color:var(--txt);padding:8px 12px;border-radius:10px;font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:0.15s ease}
+button:hover, select.currency-select:hover{border-color:var(--cyan);background:#28385a}
 button.primary{background:linear-gradient(115deg,#8b5cf6,#4f46e5);border:0;font-weight:700}
 button.gis{background:#0e7490;border-color:#22d3ee}
 button.active{background:var(--purple);border-color:var(--cyan)}
 button.small{padding:4px 8px;font-size:11px;border-radius:6px}
+
+.currency-badge{background:#101a30;border:1px solid var(--cyan);border-radius:8px;padding:6px 10px;display:flex;align-items:center;gap:6px;font-size:12px}
+.currency-badge select{background:transparent;border:none;color:var(--cyan);font-weight:700;font-size:12px;cursor:pointer;outline:none}
 
 .layout{display:grid;grid-template-columns:360px minmax(0,1fr);gap:14px}
 .panel{background:linear-gradient(150deg,#152039,#10182a);border:1px solid var(--line);border-radius:15px;overflow:hidden;min-width:0}
@@ -74,7 +77,7 @@ button.small{padding:4px 8px;font-size:11px;border-radius:6px}
 table{width:100%;border-collapse:collapse;font-size:12px}
 th,td{padding:9px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
 th{color:var(--muted)}
-td input{width:75px;background:#0a1223;color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:4px}
+td input{width:85px;background:#0a1223;color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:4px}
 .pill{border:1px solid var(--line);border-radius:20px;padding:3px 8px;font-size:10px;color:var(--muted)}
 
 .room-editor-popover{background:var(--panel2);border:1px solid var(--purple);border-radius:12px;padding:12px;margin-top:10px;display:none}
@@ -117,12 +120,26 @@ td input{width:75px;background:#0a1223;color:var(--txt);border:1px solid var(--l
      </svg>
    </div>
    <div>
-     <h1>ARCHFORM <span class="pill">2D · 3D · BOQ SOURCING</span></h1>
-     <p>AI Concept CAD, Custom Villa Elevation & BOQ Material Logistics.</p>
+     <h1>ARCHFORM <span class="pill">2D · 3D · GLOBAL BOQ</span></h1>
+     <p>AI CAD, Custom Villa Elevation & Multi-Currency BOQ Logistics.</p>
    </div>
  </div>
  <div class="actions">
-   <button class="gis" id="openBoqMap">🗺️ Find Nearby Suppliers (Maps)</button>
+   <div class="currency-badge">
+     <span id="locFlag">🌍</span>
+     <select id="userCurrency" onchange="changeCurrency(this.value)">
+       <option value="INR">INR (₹)</option>
+       <option value="USD">USD ($)</option>
+       <option value="EUR">EUR (€)</option>
+       <option value="GBP">GBP (£)</option>
+       <option value="AED">AED (د.إ)</option>
+       <option value="AUD">AUD (A$)</option>
+       <option value="CAD">CAD (C$)</option>
+       <option value="SGD">SGD (S$)</option>
+       <option value="JPY">JPY (¥)</option>
+     </select>
+   </div>
+   <button class="gis" id="openBoqMap">🗺️ Find Nearby Suppliers</button>
    <button id="save">Save JSON</button>
    <button id="open">Open JSON</button>
    <input id="file" type="file" accept=".json,application/json" style="display:none">
@@ -142,7 +159,7 @@ td input{width:75px;background:#0a1223;color:var(--txt);border:1px solid var(--l
    <button data-p="Design a 40 x 60 ft south-facing 3BHK house with 3 bathrooms, kitchen, utility, pooja and staircase.">40×60 · 3BHK</button>
   </div>
   <button class="primary wide" id="generate">✦ Generate Plan & 3D Model</button>
-  <div class="status" id="status">Touch any room to edit parameters.</div>
+  <div class="status" id="status">Detecting regional currency & initializing...</div>
 
   <!-- Touch-to-Edit Floating Box -->
   <div class="room-editor-popover" id="roomEditor">
@@ -232,14 +249,14 @@ td input{width:75px;background:#0a1223;color:var(--txt);border:1px solid var(--l
    <div class="metric"><small>Plot area</small><strong id="plotArea">—</strong></div>
    <div class="metric"><small>Built area total</small><strong id="builtArea">—</strong></div>
    <div class="metric"><small>Wall Perimeter</small><strong id="elemCount">—</strong></div>
-   <div class="metric"><small>Indicative estimate</small><strong id="total">—</strong></div>
+   <div class="metric"><small>Indicative estimate (<span class="currency-tag">₹</span>)</small><strong id="total">—</strong></div>
  </div>
 </main>
 </div>
 
 <div class="lower">
 <section class="panel">
-  <div class="ph">Material Takeoff (BOQ) <span class="pill">Direct Sourcing Active</span></div>
+  <div class="ph">Material Takeoff (BOQ) <span class="pill" id="currencyNote">Rates Localized</span></div>
   <div class="pb">
     <div class="tablewrap">
       <table>
@@ -247,7 +264,7 @@ td input{width:75px;background:#0a1223;color:var(--txt);border:1px solid var(--l
           <tr>
             <th>Material / Spec</th>
             <th>Quantity</th>
-            <th>Rate ₹</th>
+            <th id="rateHeader">Rate</th>
             <th>Amount</th>
             <th>Sourcing Desk</th>
           </tr>
@@ -314,7 +331,7 @@ td input{width:75px;background:#0a1223;color:var(--txt);border:1px solid var(--l
       </select>
       
       <span>City / Area:</span>
-      <input id="search-location-input" type="text" placeholder="e.g. Rajajinagar, Bangalore" value="Rajajinagar, Bangalore">
+      <input id="search-location-input" type="text" placeholder="Type area or city..." value="Rajajinagar, Bangalore">
       <button class="primary" onclick="searchBoqSuppliers()">🔍 Search Suppliers</button>
     </div>
 
@@ -326,9 +343,6 @@ td input{width:75px;background:#0a1223;color:var(--txt);border:1px solid var(--l
 
 <script>
 (()=>{'use strict';
-// Secret API key replaced by GitHub Actions workflow on deploy
-const SECRET_API_KEY = "__MY_API_KEY_PLACEHOLDER__";
-
 const $=id=>document.getElementById(id), NS='http://www.w3.org/2000/svg';
 let plan=null, zoom=1, showDims=true, showGrid=true, showWalls=true, showOpenings=true;
 let selectedRoomIndex = null;
@@ -337,9 +351,24 @@ let currentViewMode = '2d';
 let userSearchArea = "Rajajinagar, Bangalore";
 let userLat = 12.9716, userLng = 77.5946;
 
+// Base rates in INR
+const BASE_RATES_INR = [420, 68, 12, 65, 18, 35000];
+
+// Active localized rates and currency tracking
+let currentCurrency = 'INR';
+let currentSymbol = '₹';
+let exchangeMultiplier = 1.0;
+let rates = [...BASE_RATES_INR];
+
+const CURRENCY_SYMBOLS = {
+  INR: '₹', USD: '$', EUR: '€', GBP: '£',
+  AED: 'د.إ', AUD: 'A$', CAD: 'C$', SGD: 'S$',
+  JPY: '¥'
+};
+
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)), 
-      nfmt=v=>Number(v||0).toLocaleString('en-IN',{maximumFractionDigits:1}), 
-      cash=v=>'₹'+Math.round(v||0).toLocaleString('en-IN');
+      nfmt=v=>Number(v||0).toLocaleString(undefined,{maximumFractionDigits:1}), 
+      cash=v=>currentSymbol + ' ' + Math.round(v||0).toLocaleString(undefined);
 
 const VENDOR_DB = {
   cement: {
@@ -412,7 +441,80 @@ const VENDOR_DB = {
   }
 };
 
-let rates = [420, 68, 12, 65, 18, 35000];
+// --- Auto-Detect Country & Currency via IP Geolocation & Live FX ---
+async function detectLocationAndCurrency() {
+  try {
+    const geoRes = await fetch('https://ipapi.co/json/');
+    if(!geoRes.ok) throw new Error('Geo fetch failed');
+    const geo = await geoRes.json();
+    
+    if(geo.currency) {
+      const code = geo.currency.toUpperCase();
+      if(!CURRENCY_SYMBOLS[code]) {
+        CURRENCY_SYMBOLS[code] = geo.currency_name || code;
+        const opt = document.createElement('option');
+        opt.value = code;
+        opt.textContent = `${code} (${CURRENCY_SYMBOLS[code]})`;
+        $('userCurrency').appendChild(opt);
+      }
+      $('userCurrency').value = code;
+      if(geo.city) {
+        userSearchArea = `${geo.city}, ${geo.country_name || ''}`;
+        $('search-location-input').value = userSearchArea;
+      }
+      await updateRatesForCurrency(code);
+      $('status').textContent = `Currency localized to ${code} (${geo.country_name || 'Detected'}).`;
+      return;
+    }
+  } catch (err) {
+    console.warn('Geolocation currency detection failed, using INR base rates.');
+  }
+  updateRatesForCurrency('INR');
+}
+
+async function updateRatesForCurrency(currencyCode) {
+  currentCurrency = currencyCode;
+  currentSymbol = CURRENCY_SYMBOLS[currencyCode] || currencyCode;
+  
+  document.querySelectorAll('.currency-tag').forEach(el => el.textContent = currentSymbol);
+  $('rateHeader').textContent = `Rate (${currentSymbol})`;
+  
+  if (currencyCode === 'INR') {
+    exchangeMultiplier = 1.0;
+    rates = [...BASE_RATES_INR];
+    refreshAllViews();
+    return;
+  }
+  
+  try {
+    // Open-access exchange rates
+    const fxRes = await fetch('https://open.er-api.com/v6/latest/INR');
+    if (!fxRes.ok) throw new Error();
+    const fxData = await fxRes.json();
+    const rate = fxData.rates && fxData.rates[currencyCode];
+    if (rate) {
+      exchangeMultiplier = rate;
+      rates = BASE_RATES_INR.map(r => +(r * rate).toFixed(2));
+    }
+  } catch (e) {
+    // Fallback static conversion multipliers relative to INR
+    const fallback = { USD: 0.012, EUR: 0.011, GBP: 0.0095, AED: 0.044, AUD: 0.018, CAD: 0.016, SGD: 0.016, JPY: 1.8 };
+    exchangeMultiplier = fallback[currencyCode] || 0.012;
+    rates = BASE_RATES_INR.map(r => +(r * exchangeMultiplier).toFixed(2));
+  }
+  refreshAllViews();
+}
+
+window.changeCurrency = function(val) {
+  updateRatesForCurrency(val);
+};
+
+function refreshAllViews() {
+  if (plan) {
+    updateBOQ();
+    updateMetrics();
+  }
+}
 
 function settings(){
   return {
@@ -1082,7 +1184,7 @@ function updateBOQ(){
     tr.innerHTML=`
       <td><strong>${r.name}</strong></td>
       <td>${nfmt(r.qty)} ${r.unit}</td>
-      <td><input type="number" min="0" value="${r.rate}" aria-label="Rate for ${r.name}" data-rate="${i}"></td>
+      <td><input type="number" min="0" step="any" value="${r.rate}" aria-label="Rate for ${r.name}" data-rate="${i}"></td>
       <td>${cash(r.qty*r.rate)}</td>
       <td>
         <button class="small primary" onclick="showVendors('${r.key}')">📋 Direct Contacts</button>
@@ -1108,7 +1210,7 @@ window.showVendors = function(key){
   $('vendorTitle').innerText = `Direct Sourcing: ${v.title}`;
   
   let html = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">`;
-  html += `<div><strong style="color:var(--gold);">📍 Offline Wholesalers & Yards:</strong>`;
+  html += `<div><strong style="color:var(--gold);">📍 Offline Wholesalers & Depots:</strong>`;
   v.offline.forEach(o=>{
     html += `<div style="margin-top:6px; background:#121b30; padding:6px; border-radius:6px;">
       <div><strong>${o.name}</strong></div>
@@ -1118,7 +1220,7 @@ window.showVendors = function(key){
   });
   html += `</div>`;
 
-  html += `<div><strong style="color:var(--cyan);">🌐 Online Portals & Bulk Hubs:</strong>`;
+  html += `<div><strong style="color:var(--cyan);">🌐 Online Bulk Platforms:</strong>`;
   v.online.forEach(on=>{
     html += `<div style="margin-top:6px; background:#121b30; padding:6px; border-radius:6px;">
       <div><strong>${on.name}</strong></div>
@@ -1187,7 +1289,7 @@ window.autoDetectLocation = function(){
       $('search-location-input').value = `${userLat.toFixed(4)}, ${userLng.toFixed(4)}`;
       $('gis-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=m&z=13&ie=UTF8&iwloc=&output=embed`;
     }, ()=>{
-      alert("GPS Permission denied. Type your area or city in the input box to find local suppliers.");
+      alert("GPS permission denied. Type your area or city in the input box to find local suppliers.");
     });
   } else {
     alert("Geolocation is not supported by your browser.");
@@ -1209,7 +1311,7 @@ $('openings').onclick=()=>{
   render2D();
 };
 
-// --- High-Resolution Presentation Photo Generator ---
+// --- High-Resolution Presentation Photo Generator (Localized Currency) ---
 function exportPresentationPhoto() {
   if(!plan){ alert("Please generate a floor plan first."); return; }
 
@@ -1245,14 +1347,15 @@ function exportPresentationPhoto() {
 
   ctx.fillStyle = '#22d3ee';
   ctx.font = 'bold 16px system-ui';
-  ctx.fillText('VERIFIED 2D BLUEPRINT · CONTEMPORARY VILLA ELEVATION · MATERIAL BOQ', 80, 130);
+  ctx.fillText(`VERIFIED 2D BLUEPRINT · CONTEMPORARY ELEVATION · MATERIAL BOQ (${currentCurrency})`, 80, 130);
 
   const p = plan.settings;
   ctx.fillStyle = '#9cabc6';
   ctx.font = '16px system-ui';
   ctx.textAlign = 'right';
   ctx.fillText(`Plot Dimension: ${p.w} × ${p.d} ft (${p.w * p.d} sq.ft) | Facing: ${p.facing}`, outCv.width - 80, 80);
-  ctx.fillText(`Date: ${new Date().toLocaleDateString('en-IN')}`, outCv.width - 80, 110);
+  ctx.fillText(`Currency: ${currentCurrency} (${currentSymbol}) | Region: ${userSearchArea}`, outCv.width - 80, 108);
+  ctx.fillText(`Date: ${new Date().toLocaleDateString()}`, outCv.width - 80, 136);
   ctx.textAlign = 'left';
 
   const planSvg = $('canvas').querySelector('svg');
@@ -1292,7 +1395,7 @@ function exportPresentationPhoto() {
 
     ctx.fillStyle = '#edf3ff';
     ctx.font = 'bold 20px system-ui';
-    ctx.fillText('3. MATERIAL ESTIMATE & QUANTITIES (BOQ)', 70, 1095);
+    ctx.fillText(`3. MATERIAL ESTIMATE & QUANTITIES (BOQ in ${currentCurrency})`, 70, 1095);
 
     ctx.fillStyle = '#18243d';
     ctx.fillRect(70, 1115, outCv.width - 140, 40);
@@ -1300,8 +1403,8 @@ function exportPresentationPhoto() {
     ctx.font = 'bold 16px system-ui';
     ctx.fillText('Item Description / Trade', 90, 1142);
     ctx.fillText('Calculated Quantity', 850, 1142);
-    ctx.fillText('Unit Rate (₹)', 1400, 1142);
-    ctx.fillText('Total Forecast Amount', 1950, 1142);
+    ctx.fillText(`Unit Rate (${currentSymbol})`, 1400, 1142);
+    ctx.fillText(`Total Forecast (${currentCurrency})`, 1950, 1142);
 
     const data = materialData();
     data.forEach((r, idx) => {
@@ -1313,7 +1416,7 @@ function exportPresentationPhoto() {
       ctx.font = '16px system-ui';
       ctx.fillText(r.name, 90, rowY);
       ctx.fillText(`${nfmt(r.qty)} ${r.unit}`, 850, rowY);
-      ctx.fillText(`₹${r.rate}`, 1400, rowY);
+      ctx.fillText(`${currentSymbol} ${r.rate}`, 1400, rowY);
       ctx.fillText(cash(r.qty * r.rate), 1950, rowY);
     });
 
@@ -1329,7 +1432,7 @@ function exportPresentationPhoto() {
     ctx.textAlign = 'left';
 
     outCv.toBlob((blob) => {
-      download(blob, 'archform-presentation-sheet.png');
+      download(blob, `archform-presentation-${currentCurrency.toLowerCase()}.png`);
       URL.revokeObjectURL(svgUrl);
       $('status').textContent = 'Presentation photo downloaded successfully.';
     }, 'image/png');
@@ -1350,7 +1453,14 @@ document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{
 
 $('save').onclick=()=>{
   if(!plan){$('status').textContent='Generate a plan first.';return;}
-  download(new Blob([JSON.stringify({app:'Archform',version:5,plan,rates,labour:$('labour').value},null,2)],{type:'application/json'}),'archform-plan.json');
+  download(new Blob([JSON.stringify({
+    app:'Archform',
+    version:6,
+    currency:currentCurrency,
+    rates,
+    plan,
+    labour:$('labour').value
+  },null,2)],{type:'application/json'}),'archform-plan.json');
 };
 
 $('open').onclick = () => { $('file').click(); };
@@ -1364,6 +1474,11 @@ $('file').onchange = (e) => {
       const data = JSON.parse(reader.result);
       if(!data.plan || !data.plan.settings || !Array.isArray(data.plan.rooms)) throw new Error();
       plan = data.plan;
+      if (data.currency) {
+        currentCurrency = data.currency;
+        $('userCurrency').value = currentCurrency;
+        currentSymbol = CURRENCY_SYMBOLS[currentCurrency] || currentCurrency;
+      }
       rates = Array.isArray(data.rates) ? data.rates : rates;
       const p = plan.settings;
       $('w').value = p.w;
@@ -1407,6 +1522,7 @@ $('labour').oninput=()=>{if(plan){updateBOQ();updateMetrics()}};
 $('prompt').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')generate()});
 
 generate();
+detectLocationAndCurrency();
 })();
 </script>
 </body>
