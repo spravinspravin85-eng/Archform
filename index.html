@@ -326,6 +326,9 @@ td input{width:75px;background:#0a1223;color:var(--txt);border:1px solid var(--l
 
 <script>
 (()=>{'use strict';
+// Secret API key replaced by GitHub Actions workflow on deploy
+const SECRET_API_KEY = "__MY_API_KEY_PLACEHOLDER__";
+
 const $=id=>document.getElementById(id), NS='http://www.w3.org/2000/svg';
 let plan=null, zoom=1, showDims=true, showGrid=true, showWalls=true, showOpenings=true;
 let selectedRoomIndex = null;
@@ -800,6 +803,12 @@ function renderFacade(){
   ctx.beginPath();
   ctx.arc(bX - 25, groundY - 45, 32, 0, Math.PI * 2);
   ctx.arc(bX - 45, groundY - 30, 24, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#fef08a';
+  ctx.beginPath();
+  ctx.arc(bX + 50, groundY - 2, 3, 0, Math.PI * 2);
+  ctx.arc(bX + 220, groundY - 2, 3, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.fillStyle = '#ffffff';
