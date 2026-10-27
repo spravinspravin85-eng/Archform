@@ -4,11 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="google-site-verification" content="PlYMij8EQWbJ-I55TL0Soqq0fadDBDHNGEJida0SbKM">
-<title>Archform — Architectural CAD, 3D Elevation & Material Sourcing</title>
+<title>Archform — Architectural CAD & Material Sourcing</title>
 
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800'%3E%3Ccircle cx='400' cy='400' r='370' fill='%23090e1d' stroke='%2322d3ee' stroke-width='16'/%3E%3Cg stroke='%2322d3ee' fill='none'%3E%3Cpath d='M 230 600 L 230 380 Q 230 260 400 190 Q 570 260 570 380 L 570 600' stroke-width='20'/%3E%3Cpath d='M 285 600 L 285 400 Q 285 295 400 235 Q 515 295 515 400 L 515 600' stroke-width='20'/%3E%3C/g%3E%3C/svg%3E">
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <style>
 :root{color-scheme:dark;--bg:#090e1d;--panel:#121b30;--panel2:#18243d;--line:#2c3b58;--txt:#edf3ff;--muted:#9cabc6;--purple:#8b5cf6;--cyan:#22d3ee;--green:#86efac;--gold:#f59e0b;--danger:#ef4444}
@@ -46,26 +44,12 @@ button.small{padding:4px 8px;font-size:11px;border-radius:6px}
 .field input,.field select{width:100%;padding:8px;background:#0a1223;color:var(--txt);border:1px solid #344561;border-radius:8px;font:inherit}
 .status{color:var(--green);font-size:12px;min-height:18px;margin-top:9px}
 
-.view-mode-bar{display:flex;background:var(--panel2);border-bottom:1px solid var(--line);padding:6px 12px;gap:8px;flex-wrap:wrap}
-.view-btn{padding:6px 12px;font-size:12px;border-radius:8px}
-.view-btn.active{background:var(--purple);color:#fff;border-color:var(--cyan)}
-
-.viewport-stage{position:relative;min-height:500px;background:#f8fafc;overflow:hidden}
-.canvas{min-height:500px;overflow:auto;position:relative;touch-action:manipulation}
-.canvas svg{display:block;width:100%;min-width:580px;min-height:500px}
+.viewport-stage{position:relative;min-height:550px;background:#f8fafc;overflow:hidden}
+.canvas{min-height:550px;overflow:auto;position:relative;touch-action:manipulation}
+.canvas svg{display:block;width:100%;min-width:580px;min-height:550px}
 .canvas svg rect.room-rect{cursor:pointer;transition:stroke 0.2s, stroke-width 0.2s}
 .canvas svg rect.room-rect:hover{stroke:#2563eb;stroke-width:3}
 .canvas svg rect.room-rect.selected{stroke:#8b5cf6!important;stroke-width:4!important}
-
-#three-viewport{width:100%;height:500px;display:none;background:#090e1d;position:relative}
-#three-viewport canvas{width:100%!important;height:100%!important;display:block}
-#facade-viewport{width:100%;height:500px;display:none;background:#060a14;overflow:auto}
-#facade-viewport canvas{display:block;margin:auto;max-width:100%;height:auto}
-
-.hud-3d{position:absolute;top:10px;left:10px;background:rgba(9,14,29,0.85);backdrop-filter:blur(4px);padding:6px 12px;border-radius:8px;border:1px solid var(--line);font-size:11px;color:var(--muted);pointer-events:none;z-index:5}
-.recording-badge{position:absolute;top:10px;right:10px;background:var(--danger);color:#fff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:bold;display:none;align-items:center;gap:6px;z-index:5}
-.recording-badge span{width:8px;height:8px;background:#fff;border-radius:50%;display:inline-block;animation:pulse 1s infinite}
-@keyframes pulse{0%{opacity:1}50%{opacity:0.3}100%{opacity:1}}
 
 .metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:12px}
 .metric{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:11px}
@@ -99,7 +83,7 @@ td input{width:85px;background:#0a1223;color:var(--txt);border:1px solid var(--l
 @media(max-width:900px){
   .layout,.lower{grid-template-columns:1fr}
   .app{padding:9px}
-  .viewport-stage,#three-viewport,#facade-viewport,.canvas{min-height:380px;height:380px}
+  .viewport-stage,.canvas{min-height:380px;height:380px}
   .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 </style>
@@ -121,14 +105,13 @@ td input{width:85px;background:#0a1223;color:var(--txt);border:1px solid var(--l
    </div>
    <div>
      <h1>ARCHFORM <span class="pill">GLOBAL CAD & BOQ</span></h1>
-     <p>AI Concept CAD, Custom Villa Elevation & Universal Multi-Currency Takeoff.</p>
+     <p>Procedural Vastu Architectural Engine & Universal Multi-Currency Takeoff.</p>
    </div>
  </div>
  <div class="actions">
    <div class="currency-badge">
      <span id="locFlag">🌍</span>
      <select id="userCurrency" onchange="changeCurrency(this.value)">
-       <!-- Populated with 160+ world currencies -->
      </select>
    </div>
    <button class="gis" id="openBoqMap">🗺️ Supplier Map</button>
@@ -136,7 +119,7 @@ td input{width:85px;background:#0a1223;color:var(--txt);border:1px solid var(--l
    <button id="open">Open JSON</button>
    <input id="file" type="file" accept=".json,application/json" style="display:none">
    <button id="svgExport">Export SVG</button>
-   <button class="primary" id="pdf">📷 Export Presentation Photo</button>
+   <button class="primary" id="pdf">📷 Export Blueprint Sheet</button>
  </div>
 </header>
 
@@ -144,13 +127,13 @@ td input{width:85px;background:#0a1223;color:var(--txt);border:1px solid var(--l
 <aside class="panel">
  <div class="ph">✦ Concept Plan Engine <span class="pill">Offline Core</span></div>
  <div class="pb">
-  <textarea id="prompt" class="prompt">Design a 30 x 40 ft east-facing 2BHK house with 2 bathrooms, living room, kitchen, dining area, pooja room and staircase. Add dimensions and walls.</textarea>
+  <textarea id="prompt" class="prompt">Design a 30 x 40 ft south-facing 2BHK house with 2 bathrooms, living room, kitchen, dining area, pooja room and staircase. Add dimensions and walls.</textarea>
   <div class="chips">
    <button data-p="Design a 20 x 30 ft north-facing 1BHK home with living room, kitchen, bathroom and pooja room.">20×30 · 1BHK</button>
    <button data-p="Design a 30 x 40 ft east-facing 2BHK house with 2 bathrooms, dining, kitchen, pooja and staircase.">30×40 · 2BHK</button>
    <button data-p="Design a 40 x 60 ft south-facing 3BHK house with 3 bathrooms, kitchen, utility, pooja and staircase.">40×60 · 3BHK</button>
   </div>
-  <button class="primary wide" id="generate">✦ Generate Plan & 3D Model</button>
+  <button class="primary wide" id="generate">✦ Generate Plan</button>
   <div class="status" id="status">Syncing regional currency & initializing...</div>
 
   <!-- Touch-to-Edit Floating Box -->
@@ -192,7 +175,7 @@ td input{width:85px;background:#0a1223;color:var(--txt);border:1px solid var(--l
   <div class="fields">
    <div class="field"><label>Plot width (ft)</label><input id="w" type="number" min="10" max="300" value="30"></div>
    <div class="field"><label>Plot depth (ft)</label><input id="d" type="number" min="10" max="300" value="40"></div>
-   <div class="field"><label>Facing</label><select id="facing"><option>East</option><option>North</option><option>South</option><option>West</option></select></div>
+   <div class="field"><label>Facing</label><select id="facing"><option value="East">East</option><option value="North">North</option><option value="South" selected>South</option><option value="West">West</option></select></div>
    <div class="field"><label>Bedrooms</label><select id="beds"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option></select></div>
    <div class="field"><label>Bathrooms</label><select id="baths"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div>
    <div class="field"><label>Floors</label><select id="floors"><option>1</option><option selected>2</option><option>3</option></select></div>
@@ -205,15 +188,7 @@ td input{width:85px;background:#0a1223;color:var(--txt);border:1px solid var(--l
 
 <main>
  <section class="panel">
-   <div class="view-mode-bar">
-     <button class="view-btn active" id="btn-mode-2d" onclick="setViewMode('2d')">📐 2D Floor Plan</button>
-     <button class="view-btn" id="btn-mode-facade" onclick="setViewMode('facade')">🖼️ 2D Villa Elevation</button>
-     <button class="view-btn" id="btn-mode-3d" onclick="setViewMode('3d')">🏢 3D Building Model</button>
-     <button class="primary small" id="btn-tour" onclick="toggleWalkthrough()" style="margin-left:auto;">🎬 3D Walkthrough Tour</button>
-     <button class="small" id="btn-record" onclick="toggleRecordVideo()">🎥 Record Walkthrough Video</button>
-   </div>
-
-   <div class="toolbar" id="cad-toolbar-strip">
+   <div class="toolbar" id="cad-toolbar-strip" style="padding:10px 14px; border-bottom:1px solid var(--line);">
      <button id="zin">＋ Zoom</button>
      <button id="zout">－ Zoom</button>
      <button id="fit">Fit</button>
@@ -225,15 +200,6 @@ td input{width:85px;background:#0a1223;color:var(--txt);border:1px solid var(--l
 
    <div class="viewport-stage">
      <div id="canvas" class="canvas"></div>
-
-     <div id="facade-viewport">
-       <canvas id="facadeCanvas" width="960" height="520"></canvas>
-     </div>
-
-     <div id="three-viewport">
-       <div class="hud-3d">🖱️ Orbit: Drag | Zoom: Wheel / Pinch | Pan: Right-click</div>
-       <div class="recording-badge" id="recBadge"><span></span> REC 3D VIDEO</div>
-     </div>
    </div>
  </section>
 
@@ -284,10 +250,6 @@ td input{width:85px;background:#0a1223;color:var(--txt);border:1px solid var(--l
 <section class="panel">
   <div class="ph">Architectural Specs & FAR Envelope</div>
   <div class="pb">
-    <div>
-      <p class="hint"><strong>Elevation Specifications:</strong> Board-formed concrete left wing, floating white cantilever box frame, teak louver screening, seamless glass balcony, modern portico carport, and illuminated landscape pavers.</p>
-    </div>
-    <hr style="border:0;border-top:1px solid var(--line);margin:12px 0">
     <div class="fields">
       <div class="field"><label>FAR / FSI allowance</label><input id="fsi" type="number" step=".1" value="1.5"></div>
       <div class="field"><label>Max ground coverage (%)</label><input id="coverage" type="number" min="1" max="100" value="60"></div>
@@ -298,7 +260,7 @@ td input{width:85px;background:#0a1223;color:var(--txt);border:1px solid var(--l
 </section>
 </div>
 
-<div class="footer">Archform · Architecture CAD, 3D Rendering & Global Sourcing Platform.</div>
+<div class="footer" style="padding:16px 0; text-align:center; color:var(--muted); font-size:12px;">Archform · Procedural Architecture CAD & Global Sourcing Platform.</div>
 </div>
 
 <!-- Accurate BOQ Material Suppliers Map Modal -->
@@ -337,171 +299,23 @@ td input{width:85px;background:#0a1223;color:var(--txt);border:1px solid var(--l
 const $=id=>document.getElementById(id), NS='http://www.w3.org/2000/svg';
 let plan=null, zoom=1, showDims=true, showGrid=true, showWalls=true, showOpenings=true;
 let selectedRoomIndex = null;
-let currentViewMode = '2d';
 
 let userSearchArea = "New York, USA";
 let userCountryCode = "US";
 let userCountryName = "United States";
 
-// Base rates in INR
 const BASE_RATES_INR = [420, 68, 12, 65, 18, 35000];
 
-// Complete ISO 4217 Currency Database (160+ World Currencies)
 const ALL_WORLD_CURRENCIES = {
   INR: { s: '₹', n: 'Indian Rupee', c: 'IN', d: 'Bengaluru, India' },
   USD: { s: '$', n: 'US Dollar', c: 'US', d: 'New York, USA' },
   EUR: { s: '€', n: 'Euro', c: 'EU', d: 'Berlin, Germany' },
   GBP: { s: '£', n: 'British Pound', c: 'GB', d: 'London, UK' },
   AED: { s: 'د.إ', n: 'UAE Dirham', c: 'AE', d: 'Dubai, UAE' },
-  AFN: { s: '؋', n: 'Afghan Afghani', c: 'AF', d: 'Kabul, Afghanistan' },
-  ALL: { s: 'L', n: 'Albanian Lek', c: 'AL', d: 'Tirana, Albania' },
-  AMD: { s: '֏', n: 'Armenian Dram', c: 'AM', d: 'Yerevan, Armenia' },
-  ANG: { s: 'ƒ', n: 'NL Antillean Guilder', c: 'CW', d: 'Willemstad, Curacao' },
-  AOA: { s: 'Kz', n: 'Angolan Kwanza', c: 'AO', d: 'Luanda, Angola' },
-  ARS: { s: '$', n: 'Argentine Peso', c: 'AR', d: 'Buenos Aires, Argentina' },
-  AUD: { s: 'A$', n: 'Australian Dollar', c: 'AU', d: 'Sydney, Australia' },
-  AWG: { s: 'ƒ', n: 'Aruban Florin', c: 'AW', d: 'Oranjestad, Aruba' },
-  AZN: { s: '₼', n: 'Azerbaijani Manat', c: 'AZ', d: 'Baku, Azerbaijan' },
-  BAM: { s: 'KM', n: 'Bosnia-Herzegovina Mark', c: 'BA', d: 'Sarajevo, Bosnia' },
-  BBD: { s: '$', n: 'Barbadian Dollar', c: 'BB', d: 'Bridgetown, Barbados' },
-  BDT: { s: '৳', n: 'Bangladeshi Taka', c: 'BD', d: 'Dhaka, Bangladesh' },
-  BGN: { s: 'лв', n: 'Bulgarian Lev', c: 'BG', d: 'Sofia, Bulgaria' },
-  BHD: { s: '.د.ب', n: 'Bahraini Dinar', c: 'BH', d: 'Manama, Bahrain' },
-  BIF: { s: 'FBu', n: 'Burundian Franc', c: 'BI', d: 'Gitega, Burundi' },
-  BMD: { s: '$', n: 'Bermudian Dollar', c: 'BM', d: 'Hamilton, Bermuda' },
-  BND: { s: '$', n: 'Brunei Dollar', c: 'BN', d: 'Bandar Seri Begawan, Brunei' },
-  BOB: { s: 'Bs.', n: 'Bolivian Boliviano', c: 'BO', d: 'La Paz, Bolivia' },
-  BRL: { s: 'R$', n: 'Brazilian Real', c: 'BR', d: 'Sao Paulo, Brazil' },
-  BSD: { s: '$', n: 'Bahamian Dollar', c: 'BS', d: 'Nassau, Bahamas' },
-  BTN: { s: 'Nu.', n: 'Bhutanese Ngultrum', c: 'BT', d: 'Thimphu, Bhutan' },
-  BWP: { s: 'P', n: 'Botswanan Pula', c: 'BW', d: 'Gaborone, Botswana' },
-  BYN: { s: 'Br', n: 'Belarusian Ruble', c: 'BY', d: 'Minsk, Belarus' },
-  BZD: { s: '$', n: 'Belize Dollar', c: 'BZ', d: 'Belmopan, Belize' },
   CAD: { s: 'C$', n: 'Canadian Dollar', c: 'CA', d: 'Toronto, Canada' },
-  CDF: { s: 'FC', n: 'Congolese Franc', c: 'CD', d: 'Kinshasa, DR Congo' },
-  CHF: { s: 'CHF', n: 'Swiss Franc', c: 'CH', d: 'Zurich, Switzerland' },
-  CLP: { s: '$', n: 'Chilean Peso', c: 'CL', d: 'Santiago, Chile' },
-  CNY: { s: '¥', n: 'Chinese Yuan', c: 'CN', d: 'Shanghai, China' },
-  COP: { s: '$', n: 'Colombian Peso', c: 'CO', d: 'Bogota, Colombia' },
-  CRC: { s: '₡', n: 'Costa Rican Colón', c: 'CR', d: 'San Jose, Costa Rica' },
-  CUP: { s: '$', n: 'Cuban Peso', c: 'CU', d: 'Havana, Cuba' },
-  CVE: { s: '$', n: 'Cape Verdean Escudo', c: 'CV', d: 'Praia, Cape Verde' },
-  CZK: { s: 'Kč', n: 'Czech Koruna', c: 'CZ', d: 'Prague, Czechia' },
-  DJF: { s: 'Fdj', n: 'Djiboutian Franc', c: 'DJ', d: 'Djibouti City, Djibouti' },
-  DKK: { s: 'kr', n: 'Danish Krone', c: 'DK', d: 'Copenhagen, Denmark' },
-  DOP: { s: 'RD$', n: 'Dominican Peso', c: 'DO', d: 'Santo Domingo, DR' },
-  DZD: { s: 'دج', n: 'Algerian Dinar', c: 'DZ', d: 'Algiers, Algeria' },
-  EGP: { s: '£', n: 'Egyptian Pound', c: 'EG', d: 'Cairo, Egypt' },
-  ERN: { s: 'Nfk', n: 'Eritrean Nakfa', c: 'ER', d: 'Asmara, Eritrea' },
-  ETB: { s: 'Br', n: 'Ethiopian Birr', c: 'ET', d: 'Addis Ababa, Ethiopia' },
-  FJD: { s: '$', n: 'Fijian Dollar', c: 'FJ', d: 'Suva, Fiji' },
-  FKP: { s: '£', n: 'Falkland Islands Pound', c: 'FK', d: 'Stanley, Falkland Islands' },
-  GEL: { s: '₾', n: 'Georgian Lari', c: 'GE', d: 'Tbilisi, Georgia' },
-  GHS: { s: 'GH₵', n: 'Ghanaian Cedi', c: 'GH', d: 'Accra, Ghana' },
-  GIP: { s: '£', n: 'Gibraltar Pound', c: 'GI', d: 'Gibraltar' },
-  GMD: { s: 'D', n: 'Gambian Dalasi', c: 'GM', d: 'Banjul, Gambia' },
-  GNF: { s: 'FG', n: 'Guinean Franc', c: 'GN', d: 'Conakry, Guinea' },
-  GTQ: { s: 'Q', n: 'Guatemalan Quetzal', c: 'GT', d: 'Guatemala City, Guatemala' },
-  GYD: { s: '$', n: 'Guyanaese Dollar', c: 'GY', d: 'Georgetown, Guyana' },
-  HKD: { s: 'HK$', n: 'Hong Kong Dollar', c: 'HK', d: 'Hong Kong' },
-  HNL: { s: 'L', n: 'Honduran Lempira', c: 'HN', d: 'Tegucigalpa, Honduras' },
-  HRK: { s: 'kn', n: 'Croatian Kuna', c: 'HR', d: 'Zagreb, Croatia' },
-  HTG: { s: 'G', n: 'Haitian Gourde', c: 'HT', d: 'Port-au-Prince, Haiti' },
-  HUF: { s: 'Ft', n: 'Hungarian Forint', c: 'HU', d: 'Budapest, Hungary' },
-  IDR: { s: 'Rp', n: 'Indonesian Rupiah', c: 'ID', d: 'Jakarta, Indonesia' },
-  ILS: { s: '₪', n: 'Israeli New Shekel', c: 'IL', d: 'Tel Aviv, Israel' },
-  IQD: { s: 'ع.د', n: 'Iraqi Dinar', c: 'IQ', d: 'Baghdad, Iraq' },
-  IRR: { s: '﷼', n: 'Iranian Rial', c: 'IR', d: 'Tehran, Iran' },
-  ISK: { s: 'kr', n: 'Icelandic Króna', c: 'IS', d: 'Reykjavik, Iceland' },
-  JMD: { s: 'J$', n: 'Jamaican Dollar', c: 'JM', d: 'Kingston, Jamaica' },
-  JOD: { s: 'JD', n: 'Jordanian Dinar', c: 'JO', d: 'Amman, Jordan' },
-  JPY: { s: '¥', n: 'Japanese Yen', c: 'JP', d: 'Tokyo, Japan' },
-  KES: { s: 'KSh', n: 'Kenyan Shilling', c: 'KE', d: 'Nairobi, Kenya' },
-  KGS: { s: 'с', n: 'Kyrgystani Som', c: 'KG', d: 'Bishkek, Kyrgyzstan' },
-  KHR: { s: '៛', n: 'Cambodian Riel', c: 'KH', d: 'Phnom Penh, Cambodia' },
-  KMF: { s: 'CF', n: 'Comorian Franc', c: 'KM', d: 'Moroni, Comoros' },
-  KRW: { s: '₩', n: 'South Korean Won', c: 'KR', d: 'Seoul, South Korea' },
-  KWD: { s: 'KD', n: 'Kuwaiti Dinar', c: 'KW', d: 'Kuwait City, Kuwait' },
-  KYD: { s: '$', n: 'Cayman Islands Dollar', c: 'KY', d: 'George Town, Cayman Islands' },
-  KZT: { s: '₸', n: 'Kazakhstani Tenge', c: 'KZ', d: 'Almaty, Kazakhstan' },
-  LAK: { s: '₭', n: 'Laotian Kip', c: 'LA', d: 'Vientiane, Laos' },
-  LBP: { s: 'ل.ل', n: 'Lebanese Pound', c: 'LB', d: 'Beirut, Lebanon' },
-  LKR: { s: 'Rs', n: 'Sri Lankan Rupee', c: 'LK', d: 'Colombo, Sri Lanka' },
-  LRD: { s: '$', n: 'Liberian Dollar', c: 'LR', d: 'Monrovia, Liberia' },
-  LSL: { s: 'L', n: 'Lesotho Loti', c: 'LS', d: 'Maseru, Lesotho' },
-  LYD: { s: 'LD', n: 'Libyan Dinar', c: 'LY', d: 'Tripoli, Libya' },
-  MAD: { s: 'DH', n: 'Moroccan Dirham', c: 'MA', d: 'Casablanca, Morocco' },
-  MDL: { s: 'L', n: 'Moldovan Leu', c: 'MD', d: 'Chisinau, Moldova' },
-  MGA: { s: 'Ar', n: 'Malagasy Ariary', c: 'MG', d: 'Antananarivo, Madagascar' },
-  MKD: { s: 'ден', n: 'Macedonian Denar', c: 'MK', d: 'Skopje, North Macedonia' },
-  MMK: { s: 'K', n: 'Myanmar Kyat', c: 'MM', d: 'Yangon, Myanmar' },
-  MNT: { s: '₮', n: 'Mongolian Tugrik', c: 'MN', d: 'Ulaanbaatar, Mongolia' },
-  MOP: { s: 'MOP$', n: 'Macanese Pataca', c: 'MO', d: 'Macau' },
-  MRU: { s: 'UM', n: 'Mauritanian Ouguiya', c: 'MR', d: 'Nouakchott, Mauritania' },
-  MUR: { s: 'Rs', n: 'Mauritian Rupee', c: 'MU', d: 'Port Louis, Mauritius' },
-  MVR: { s: 'Rf', n: 'Maldivian Rufiyaa', c: 'MV', d: 'Male, Maldives' },
-  MWK: { s: 'MK', n: 'Malawian Kwacha', c: 'MW', d: 'Lilongwe, Malawi' },
-  MXN: { s: '$', n: 'Mexican Peso', c: 'MX', d: 'Mexico City, Mexico' },
-  MYR: { s: 'RM', n: 'Malaysian Ringgit', c: 'MY', d: 'Kuala Lumpur, Malaysia' },
-  MZN: { s: 'MT', n: 'Mozambican Metical', c: 'MZ', d: 'Maputo, Mozambique' },
-  NAD: { s: '$', n: 'Namibian Dollar', c: 'NA', d: 'Windhoek, Namibia' },
-  NGN: { s: '₦', n: 'Nigerian Naira', c: 'NG', d: 'Lagos, Nigeria' },
-  NIO: { s: 'C$', n: 'Nicaraguan Córdoba', c: 'NI', d: 'Managua, Nicaragua' },
-  NOK: { s: 'kr', n: 'Norwegian Krone', c: 'NO', d: 'Oslo, Norway' },
-  NPR: { s: 'Rs', n: 'Nepalese Rupee', c: 'NP', d: 'Kathmandu, Nepal' },
-  NZD: { s: 'NZ$', n: 'New Zealand Dollar', c: 'NZ', d: 'Auckland, New Zealand' },
-  OMR: { s: '﷼', n: 'Omani Rial', c: 'OM', d: 'Muscat, Oman' },
-  PAB: { s: 'B/.', n: 'Panamanian Balboa', c: 'PA', d: 'Panama City, Panama' },
-  PEN: { s: 'S/.', n: 'Peruvian Sol', c: 'PE', d: 'Lima, Peru' },
-  PGK: { s: 'K', n: 'Papua New Guinean Kina', c: 'PG', d: 'Port Moresby, PNG' },
-  PHP: { s: '₱', n: 'Philippine Peso', c: 'PH', d: 'Manila, Philippines' },
-  PKR: { s: 'Rs', n: 'Pakistani Rupee', c: 'PK', d: 'Karachi, Pakistan' },
-  PLN: { s: 'zł', n: 'Polish Złoty', c: 'PL', d: 'Warsaw, Poland' },
-  PYG: { s: '₲', n: 'Paraguayan Guarani', c: 'PY', d: 'Asuncion, Paraguay' },
-  QAR: { s: 'QR', n: 'Qatari Rial', c: 'QA', d: 'Doha, Qatar' },
-  RON: { s: 'lei', n: 'Romanian Leu', c: 'RO', d: 'Bucharest, Romania' },
-  RSD: { s: 'дин.', n: 'Serbian Dinar', c: 'RS', d: 'Belgrade, Serbia' },
-  RUB: { s: '₽', n: 'Russian Ruble', c: 'RU', d: 'Moscow, Russia' },
-  RWF: { s: 'RF', n: 'Rwandan Franc', c: 'RW', d: 'Kigali, Rwanda' },
-  SAR: { s: '﷼', n: 'Saudi Riyal', c: 'SA', d: 'Riyadh, Saudi Arabia' },
-  SBD: { s: '$', n: 'Solomon Islands Dollar', c: 'SB', d: 'Honiara, Solomon Islands' },
-  SCR: { s: 'SR', n: 'Seychellois Rupee', c: 'SC', d: 'Victoria, Seychelles' },
-  SDG: { s: '£', n: 'Sudanese Pound', c: 'SD', d: 'Khartoum, Sudan' },
-  SEK: { s: 'kr', n: 'Swedish Krona', c: 'SE', d: 'Stockholm, Sweden' },
+  AUD: { s: 'A$', n: 'Australian Dollar', c: 'AU', d: 'Sydney, Australia' },
   SGD: { s: 'S$', n: 'Singapore Dollar', c: 'SG', d: 'Singapore' },
-  SHP: { s: '£', n: 'Saint Helena Pound', c: 'SH', d: 'Jamestown, Saint Helena' },
-  SLE: { s: 'Le', n: 'Sierra Leonean Leone', c: 'SL', d: 'Freetown, Sierra Leone' },
-  SOS: { s: 'Sh', n: 'Somali Shilling', c: 'SO', d: 'Mogadishu, Somalia' },
-  SRD: { s: '$', n: 'Surinamese Dollar', c: 'SR', d: 'Paramaribo, Suriname' },
-  SSP: { s: '£', n: 'South Sudanese Pound', c: 'SS', d: 'Juba, South Sudan' },
-  STN: { s: 'Db', n: 'São Tomé & Príncipe Dobra', c: 'ST', d: 'Sao Tome' },
-  SYP: { s: '£', n: 'Syrian Pound', c: 'SY', d: 'Damascus, Syria' },
-  SZL: { s: 'L', n: 'Swazi Lilangeni', c: 'SZ', d: 'Mbabane, Eswatini' },
-  THB: { s: '฿', n: 'Thai Baht', c: 'TH', d: 'Bangkok, Thailand' },
-  TJS: { s: 'SM', n: 'Tajikistani Somoni', c: 'TJ', d: 'Dushanbe, Tajikistan' },
-  TMT: { s: 'T', n: 'Turkmenistani Manat', c: 'TM', d: 'Ashgabat, Turkmenistan' },
-  TND: { s: 'DT', n: 'Tunisian Dinar', c: 'TN', d: 'Tunis, Tunisia' },
-  TOP: { s: 'T$', n: 'Tongan Paʻanga', c: 'TO', d: 'Nukuʻalofa, Tonga' },
-  TRY: { s: '₺', n: 'Turkish Lira', c: 'TR', d: 'Istanbul, Turkey' },
-  TTD: { s: 'TT$', n: 'Trinidad and Tobago Dollar', c: 'TT', d: 'Port of Spain, Trinidad' },
-  TWD: { s: 'NT$', n: 'New Taiwan Dollar', c: 'TW', d: 'Taipei, Taiwan' },
-  TZS: { s: 'TSh', n: 'Tanzanian Shilling', c: 'TZ', d: 'Dar es Salaam, Tanzania' },
-  UAH: { s: '₴', n: 'Ukrainian Hryvnia', c: 'UA', d: 'Kyiv, Ukraine' },
-  UGX: { s: 'USh', n: 'Ugandan Shilling', c: 'UG', d: 'Kampala, Uganda' },
-  UYU: { s: '$U', n: 'Uruguayan Peso', c: 'UY', d: 'Montevideo, Uruguay' },
-  UZS: { s: 'so\'m', n: 'Uzbekistani Som', c: 'UZ', d: 'Tashkent, Uzbekistan' },
-  VES: { s: 'Bs.S', n: 'Venezuelan Bolívar', c: 'VE', d: 'Caracas, Venezuela' },
-  VND: { s: '₫', n: 'Vietnamese Dong', c: 'VN', d: 'Ho Chi Minh City, Vietnam' },
-  VUV: { s: 'VT', n: 'Vanuatu Vatu', c: 'VU', d: 'Port Vila, Vanuatu' },
-  WST: { s: 'WS$', n: 'Samoan Tala', c: 'WS', d: 'Apia, Samoa' },
-  XAF: { s: 'FCFA', n: 'Central African CFA Franc', c: 'CM', d: 'Douala, Cameroon' },
-  XCD: { s: 'EC$', n: 'East Caribbean Dollar', c: 'AG', d: 'St. John\'s, Antigua' },
-  XOF: { s: 'CFA', n: 'West African CFA Franc', c: 'SN', d: 'Dakar, Senegal' },
-  XPF: { s: '₣', n: 'CFP Franc', c: 'PF', d: 'Papeete, French Polynesia' },
-  YER: { s: '﷼', n: 'Yemeni Rial', c: 'YE', d: 'Sanaa, Yemen' },
-  ZAR: { s: 'R', n: 'South African Rand', c: 'ZA', d: 'Johannesburg, South Africa' },
-  ZMW: { s: 'ZK', n: 'Zambian Kwacha', c: 'ZM', d: 'Lusaka, Zambia' },
-  ZWL: { s: '$', n: 'Zimbabwean Dollar', c: 'ZW', d: 'Harare, Zimbabwe' }
+  JPY: { s: '¥', n: 'Japanese Yen', c: 'JP', d: 'Tokyo, Japan' }
 };
 
 let currentCurrency = 'USD';
@@ -513,365 +327,44 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),
       nfmt=v=>Number(v||0).toLocaleString(undefined,{maximumFractionDigits:1}), 
       cash=v=>currentSymbol + ' ' + Math.round(v||0).toLocaleString(undefined);
 
-// --- Online-Only Retailers & Suppliers (No offline locations, No phone numbers) ---
 const COUNTRY_SUPPLIERS = {
   US: {
     name: "United States",
-    cement: {
-      query: "ready mix concrete supplier cement plant",
-      title: "Cement & Ready-Mix (ASTM C150 Type I/II)",
-      online: [
-        { name: "The Home Depot Pro", site: "https://www.homedepot.com/c/Pro_Xtra" },
-        { name: "White Cap Building Materials", site: "https://www.whitecap.com" }
-      ]
-    },
-    steel: {
-      query: "rebar fabricator structural steel stockist",
-      title: "Deformed Rebar (Grade 60) & Structural Steel",
-      online: [
-        { name: "Builders FirstSource", site: "https://www.bldr.com" },
-        { name: "Ryerson Metal Solutions", site: "https://www.ryerson.com" }
-      ]
-    },
-    bricks: {
-      query: "brick and masonry supply concrete block depot",
-      title: "Concrete Masonry Units (CMU) & Clay Face Brick",
-      online: [
-        { name: "Lowe's for Pros", site: "https://www.lowes.com/pro" }
-      ]
-    },
-    flooring: {
-      query: "tile and stone distributor commercial flooring",
-      title: "Porcelain, Luxury Vinyl Tile (LVT) & Hardwood",
-      online: [
-        { name: "Build.com Commercial Flooring", site: "https://www.build.com" },
-        { name: "Floor & Decor Direct", site: "https://www.flooranddecor.com" }
-      ]
-    },
-    paint: {
-      query: "Sherwin Williams commercial paint store PPG Paints",
-      title: "Architectural Exterior Acrylic & Latex Coatings",
-      online: [
-        { name: "Sherwin-Williams Pro", site: "https://www.sherwin-williams.com" },
-        { name: "Benjamin Moore Pro Direct", site: "https://www.benjaminmoore.com" }
-      ]
-    },
-    hardware: {
-      query: "commercial doors windows architectural hardware supplier",
-      title: "Commercial Grade Doors, Insulated Windows & Glazing",
-      online: [
-        { name: "Grainger Industrial Building Supply", site: "https://www.grainger.com" },
-        { name: "Ferguson Commercial Supply", site: "https://www.ferguson.com" }
-      ]
-    }
+    cement: { query: "ready mix concrete supplier cement plant", title: "Cement & Ready-Mix (ASTM C150)", online: [{ name: "The Home Depot Pro", site: "https://www.homedepot.com/c/Pro_Xtra" }] },
+    steel: { query: "rebar fabricator structural steel stockist", title: "Deformed Rebar & Structural Steel", online: [{ name: "Builders FirstSource", site: "https://www.bldr.com" }] },
+    bricks: { query: "brick and masonry supply concrete block depot", title: "Concrete Masonry Units & Face Brick", online: [{ name: "Lowe's for Pros", site: "https://www.lowes.com/pro" }] },
+    flooring: { query: "tile and stone distributor commercial flooring", title: "Porcelain & Hardwood", online: [{ name: "Build.com Commercial Flooring", site: "https://www.build.com" }] },
+    paint: { query: "Sherwin Williams commercial paint store", title: "Architectural Exterior Acrylic Coatings", online: [{ name: "Sherwin-Williams Pro", site: "https://www.sherwin-williams.com" }] },
+    hardware: { query: "commercial doors windows architectural hardware", title: "Glazing & Hardware", online: [{ name: "Grainger Industrial", site: "https://www.grainger.com" }] }
   },
-
-  GB: {
-    name: "United Kingdom",
-    cement: {
-      query: "builders merchant ready mix concrete Hanson Tarmac",
-      title: "Portland Cement (BS EN 197-1 CEM I/II) & Ready-Mix",
-      online: [
-        { name: "Selco Builders Warehouse Online", site: "https://www.selcobw.com" },
-        { name: "Jewson Online Trade Desk", site: "https://www.jewson.co.uk" }
-      ]
-    },
-    steel: {
-      query: "reinforcing steel rebar mesh British Steel stockholders",
-      title: "High Yield Reinforcing Rebars (BS 4449 B500B)",
-      online: [
-        { name: "Metals4U UK National Delivery", site: "https://www.metals4u.co.uk" }
-      ]
-    },
-    bricks: {
-      query: "brick merchant Ibstock Forterra airlite block supplier",
-      title: "Engineering Bricks & Thermalite Aircrete Blocks",
-      online: [
-        { name: "Buildbase UK Direct", site: "https://www.buildbase.co.uk" }
-      ]
-    },
-    flooring: {
-      query: "porcelain tiles engineered wood flooring trade merchant",
-      title: "Vitrified Porcelain & Engineered Hardwood",
-      online: [
-        { name: "Tile Mountain Trade Direct", site: "https://www.tilemountain.co.uk" },
-        { name: "Topps Tiles Trade", site: "https://www.toppstiles.co.uk" }
-      ]
-    },
-    paint: {
-      query: "Dulux Decorator Centre Crown Decorating Trade",
-      title: "Weather-Shield Masonry & Trade Emulsions",
-      online: [
-        { name: "Brewers Decorator Centres", site: "https://www.brewers.co.uk" },
-        { name: "Dulux Decorator Centre", site: "https://www.duluxdecoratorcentre.co.uk" }
-      ]
-    },
-    hardware: {
-      query: "UPVC double glazing doors architectural ironmongery",
-      title: "A-Rated Double Glazed Units & Stainless Hardware",
-      online: [
-        { name: "Screwfix Pro Trade Direct", site: "https://www.screwfix.com" },
-        { name: "IronmongeryDirect", site: "https://www.ironmongerydirect.co.uk" }
-      ]
-    }
-  },
-
-  AE: {
-    name: "United Arab Emirates",
-    cement: {
-      query: "ready mix concrete plant cement company Dubai Abu Dhabi",
-      title: "SRC / OPC 53 Grade Cement & Ready-Mix (Gulf Spec)",
-      online: [
-        { name: "Danube Building Materials Portal", site: "https://www.aldanube.com" }
-      ]
-    },
-    steel: {
-      query: "rebar fabricator structural steel supplier Sharjah Dubai",
-      title: "Deformed Steel Rebars (BS 4449 B500B / ASTM A615)",
-      online: [
-        { name: "Emirates Steel Commercial Portal", site: "https://www.emiratessteel.com" }
-      ]
-    },
-    bricks: {
-      query: "autoclaved aerated concrete block supplier thermal block UAE",
-      title: "Thermal Insulated AAC Blocks & Interlock Pavers",
-      online: [
-        { name: "Al Manaratain UAE Masonry Desk", site: "https://almanaratain.com" }
-      ]
-    },
-    flooring: {
-      query: "RAK ceramics showroom marble granite supplier Dubai",
-      title: "Full-Body Porcelain, Italian Marble & Omani Stone",
-      online: [
-        { name: "Dragon Mart Wholesale Direct", site: "https://www.dragonmart.ae" },
-        { name: "RAK Ceramics Store", site: "https://www.rakceramics.com" }
-      ]
-    },
-    paint: {
-      query: "Jotun Paints store National Paints dealer UAE",
-      title: "Heat-Reflective Exterior Fenomastic & Weathercoat",
-      online: [
-        { name: "Al-Futtaim ACE Hardware", site: "https://www.aceuae.com" },
-        { name: "Jotun Online Gateway", site: "https://www.jotun.com" }
-      ]
-    },
-    hardware: {
-      query: "aluminum curtain wall glazing architectural ironmongery UAE",
-      title: "Thermal Break Aluminum Windows, Tempered Glass & Balustrades",
-      online: [
-        { name: "Danube Home Hardware Portal", site: "https://www.danubehome.com" }
-      ]
-    }
-  },
-
-  CA: {
-    name: "Canada",
-    cement: {
-      query: "ready mix concrete plant cement supplier Ontario BC Quebec",
-      title: "General Use (GU) / Portland-Limestone (GUL) Cement",
-      online: [
-        { name: "RONA+ Pro Commercial Services", site: "https://www.rona.ca/en/pro" }
-      ]
-    },
-    steel: {
-      query: "rebar fabricator structural steel beams Canam Ryerson Canada",
-      title: "Weldable Deformed Billet Steel (CSA G30.18 400W)",
-      online: [
-        { name: "Russell Metals Commercial Supply", site: "https://www.russellmetals.com" }
-      ]
-    },
-    bricks: {
-      query: "brick and stone masonry concrete block supplier Canada",
-      title: "Architectural Precast Stone & Concrete Masonry Units",
-      online: [
-        { name: "Home Hardware Building Centre", site: "https://www.homehardware.ca" }
-      ]
-    },
-    flooring: {
-      query: "commercial tiles showroom engineered hardwood floor Canada",
-      title: "Frost-Proof Porcelain, Granite Slab & Maple Hardwood",
-      online: [
-        { name: "End Of The Roll Flooring Centres", site: "https://www.endoftheroll.com" }
-      ]
-    },
-    paint: {
-      query: "Dulux Paints commercial store Benjamin Moore Pro Canada",
-      title: "Cold-Weather Low-VOC Exterior Acrylics",
-      online: [
-        { name: "Sherwin-Williams Canada Commercial", site: "https://www.sherwin-williams.ca" },
-        { name: "Benjamin Moore Canada", site: "https://www.benjaminmoore.ca" }
-      ]
-    },
-    hardware: {
-      query: "triple pane windows commercial doors hardware Canada",
-      title: "ENERGY STAR Zone 3 Triple Glazed Windows & Steel Entry Doors",
-      online: [
-        { name: "Home Depot Canada Pro Desk", site: "https://www.homedepot.ca/pro" },
-        { name: "Richelieu Hardware", site: "https://www.richelieu.com" }
-      ]
-    }
-  },
-
-  AU: {
-    name: "Australia",
-    cement: {
-      query: "ready mix concrete supplier Boral Hanson Holcim Australia",
-      title: "General Purpose (GP) Cement & Concrete (AS 3972)",
-      online: [
-        { name: "Bunnings Trade PowerPass Desk", site: "https://trade.bunnings.com.au" }
-      ]
-    },
-    steel: {
-      query: "BlueScope steel rebar reinforcing mesh Infravest Australia",
-      title: "500N Deformed Reinforcing Bar & TRUECORE Steel",
-      online: [
-        { name: "Bowens The Builders Choice", site: "https://www.bowens.com.au" }
-      ]
-    },
-    bricks: {
-      query: "Brickworks Austral Bricks concrete block masonry depot",
-      title: "Dry Pressed Face Bricks & Besser Concrete Blocks",
-      online: [
-        { name: "National Masonry Direct", site: "https://nationalmasonry.com.au" }
-      ]
-    },
-    flooring: {
-      query: "Beaumont Tiles National Tiles commercial showroom Australia",
-      title: "Vitrified Outdoor Pavers & Spotted Gum Hardwood",
-      online: [
-        { name: "Amber Tiles Commercial Online", site: "https://www.ambertiles.com.au" },
-        { name: "National Tiles Online", site: "https://www.nationaltiles.com.au" }
-      ]
-    },
-    paint: {
-      query: "Dulux Trade Centre Taubmans Paint store Australia",
-      title: "Weathershield Anti-UV Exterior & Low VOC Acrylics",
-      online: [
-        { name: "Inspirations Paint Commercial Portal", site: "https://www.inspirationspaint.com.au" }
-      ]
-    },
-    hardware: {
-      query: "Bradnam's Windows Stegbar G.James architectural glass",
-      title: "Bushfire Rated Double Glazing & Louvered Systems",
-      online: [
-        { name: "Bunnings Commercial Fasteners & Fittings", site: "https://trade.bunnings.com.au" }
-      ]
-    }
-  },
-
   IN: {
     name: "India",
-    cement: {
-      query: "UltraTech cement dealer Shankara Buildpro ready mix concrete",
-      title: "Cement Sourcing (OPC/PPC 53 Grade)",
-      online: [
-        { name: "BuildersMART Cement Desk", site: "https://www.buildersmart.in" },
-        { name: "IBO Wholesale Hub", site: "https://www.ibo.com" }
-      ]
-    },
-    steel: {
-      query: "TMT bar dealer JSW Kamdhenu SAIL stockist steel yard",
-      title: "TMT Rebars & Structural Fe550D Steel",
-      online: [
-        { name: "JSW One MSME Mart", site: "https://www.jswonemsme.com" },
-        { name: "BuildersMART Steel", site: "https://www.buildersmart.in" }
-      ]
-    },
-    bricks: {
-      query: "AAC block supplier wirecut red clay bricks depot",
-      title: "AAC Blocks & Red Wirecut Bricks",
-      online: [
-        { name: "IndiaMART Verified Block Dealers", site: "https://dir.indiamart.com/bangalore/aac-blocks.html" }
-      ]
-    },
-    flooring: {
-      query: "Kajaria tile world Somany granite marble showroom",
-      title: "Vitrified Tiles, Granite & Marble",
-      online: [
-        { name: "IBO Flooring & Wall Tiles", site: "https://www.ibo.com" },
-        { name: "Kajaria Ceramics Online", site: "https://www.kajariaceramics.com" }
-      ]
-    },
-    paint: {
-      query: "Asian Paints colour ideas Berger paints dealer store",
-      title: "Exterior Weathercoat & Luxury Emulsions",
-      online: [
-        { name: "Asian Paints Direct Concierge", site: "https://www.asianpaints.com" }
-      ]
-    },
-    hardware: {
-      query: "Fenesta UPVC windows doors architectural hardware shop",
-      title: "Doors, Windows, UPVC Glazing & Hardware",
-      online: [
-        { name: "IBO Hardware & Fixture Hub", site: "https://www.ibo.com" }
-      ]
-    }
+    cement: { query: "UltraTech cement dealer Shankara ready mix", title: "Cement (OPC/PPC 53 Grade)", online: [{ name: "BuildersMART Cement Desk", site: "https://www.buildersmart.in" }] },
+    steel: { query: "TMT bar dealer JSW Kamdhenu steel yard", title: "TMT Rebars Fe550D", online: [{ name: "JSW One MSME Mart", site: "https://www.jswonemsme.com" }] },
+    bricks: { query: "AAC block supplier red wirecut bricks depot", title: "AAC Blocks & Red Bricks", online: [{ name: "IndiaMART Block Dealers", site: "https://dir.indiamart.com" }] },
+    flooring: { query: "Kajaria tile world Somany granite showroom", title: "Vitrified Tiles & Granite", online: [{ name: "IBO Flooring", site: "https://www.ibo.com" }] },
+    paint: { query: "Asian Paints colour ideas Berger paints dealer", title: "Weathercoat & Emulsions", online: [{ name: "Asian Paints Direct", site: "https://www.asianpaints.com" }] },
+    hardware: { query: "Fenesta UPVC windows doors architectural hardware", title: "Doors, UPVC Windows & Hardware", online: [{ name: "IBO Hardware Hub", site: "https://www.ibo.com" }] }
   },
-
   GLOBAL: {
     name: "Global Procurement",
-    cement: {
-      query: "cement dealer concrete ready mix supplier",
-      title: "Portland Cement (ASTM/EN Standard) & Ready-Mix",
-      online: [
-        { name: "CRH Direct Construction Hub", site: "https://www.crh.com" },
-        { name: "Holcim Group Logistics", site: "https://www.holcim.com" }
-      ]
-    },
-    steel: {
-      query: "structural steel rebar stockholders metal depot",
-      title: "Deformed Concrete Reinforcement Rebars",
-      online: [
-        { name: "Alibaba Verified Trade Metal Suppliers", site: "https://www.alibaba.com" },
-        { name: "ArcelorMittal Distribution", site: "https://corporate.arcelormittal.com" }
-      ]
-    },
-    bricks: {
-      query: "concrete masonry blocks clay face brick depot",
-      title: "Autoclaved Concrete Blocks & Solid Bricks",
-      online: [
-        { name: "Saint-Gobain Building Distribution", site: "https://www.saint-gobain.com" }
-      ]
-    },
-    flooring: {
-      query: "porcelain tiles marble slab granite distributor",
-      title: "Glazed Vitrified Porcelain & Granite Slabs",
-      online: [
-        { name: "Porcelanosa Grupo International", site: "https://www.porcelanosa.com" }
-      ]
-    },
-    paint: {
-      query: "protective coatings commercial paint distributor PPG Sherwin",
-      title: "Weatherproof Exterior Acrylics & Coatings",
-      online: [
-        { name: "PPG Architectural Coatings Global", site: "https://www.ppgpaints.com" }
-      ]
-    },
-    hardware: {
-      query: "architectural ironmongery commercial windows doors",
-      title: "Double Glazed Windows & Heavy-Duty Hardware",
-      online: [
-        { name: "RS Components Industrial Supply", site: "https://www.rs-online.com" }
-      ]
-    }
+    cement: { query: "cement dealer concrete ready mix supplier", title: "Portland Cement & Ready-Mix", online: [{ name: "Holcim Group Logistics", site: "https://www.holcim.com" }] },
+    steel: { query: "structural steel rebar stockholders", title: "Concrete Reinforcement Rebars", online: [{ name: "ArcelorMittal Distribution", site: "https://corporate.arcelormittal.com" }] },
+    bricks: { query: "concrete masonry blocks clay face brick depot", title: "Masonry Units & Bricks", online: [{ name: "Saint-Gobain Building Distribution", site: "https://www.saint-gobain.com" }] },
+    flooring: { query: "porcelain tiles marble slab granite distributor", title: "Vitrified Porcelain & Granite", online: [{ name: "Porcelanosa Grupo", site: "https://www.porcelanosa.com" }] },
+    paint: { query: "commercial paint distributor PPG Sherwin", title: "Weatherproof Exterior Acrylics", online: [{ name: "PPG Architectural Coatings", site: "https://www.ppgpaints.com" }] },
+    hardware: { query: "architectural ironmongery windows doors", title: "Double Glazed Windows & Hardware", online: [{ name: "RS Components Industrial", site: "https://www.rs-online.com" }] }
   }
 };
 
 function getActiveCountrySourcing() {
-  if (COUNTRY_SUPPLIERS[userCountryCode]) {
-    return COUNTRY_SUPPLIERS[userCountryCode];
-  }
-  const curItem = ALL_WORLD_CURRENCIES[currentCurrency];
-  if (curItem && COUNTRY_SUPPLIERS[curItem.c]) {
-    return COUNTRY_SUPPLIERS[curItem.c];
-  }
-  return COUNTRY_SUPPLIERS.GLOBAL;
+  return COUNTRY_SUPPLIERS[userCountryCode] || COUNTRY_SUPPLIERS[currentCurrency] || COUNTRY_SUPPLIERS.GLOBAL;
 }
 
 function populateAllCurrencies() {
   const sel = $('userCurrency');
   sel.innerHTML = '';
-  Object.keys(ALL_WORLD_CURRENCIES).sort().forEach(code => {
+  Object.keys(ALL_WORLD_CURRENCIES).forEach(code => {
     const item = ALL_WORLD_CURRENCIES[code];
     const opt = document.createElement('option');
     opt.value = code;
@@ -885,9 +378,8 @@ async function detectLocationAndCurrency() {
   populateAllCurrencies();
   try {
     const geoRes = await fetch('https://ipapi.co/json/');
-    if(!geoRes.ok) throw new Error('Geo fetch failed');
+    if(!geoRes.ok) throw new Error();
     const geo = await geoRes.json();
-    
     if(geo.country_code) {
       userCountryCode = geo.country_code.toUpperCase();
       userCountryName = geo.country_name || userCountryCode;
@@ -896,19 +388,14 @@ async function detectLocationAndCurrency() {
       userSearchArea = `${geo.city}, ${userCountryName}`;
       $('search-location-input').value = userSearchArea;
     }
-
-    if(geo.currency) {
+    if(geo.currency && ALL_WORLD_CURRENCIES[geo.currency.toUpperCase()]) {
       const code = geo.currency.toUpperCase();
-      if(ALL_WORLD_CURRENCIES[code]) {
-        $('userCurrency').value = code;
-      }
+      $('userCurrency').value = code;
       await updateRatesForCurrency(code);
-      $('status').textContent = `Localized to ${userCountryName} (${code} — ${ALL_WORLD_CURRENCIES[code]?.s || ''}). Online retailers loaded.`;
+      $('status').textContent = `Ready: ${userCountryName} (${code}).`;
       return;
     }
-  } catch (err) {
-    console.warn('Geolocation detection failed, default USD loaded.');
-  }
+  } catch(e) {}
   updateRatesForCurrency('USD');
 }
 
@@ -916,44 +403,27 @@ async function updateRatesForCurrency(currencyCode) {
   currentCurrency = currencyCode;
   const cData = ALL_WORLD_CURRENCIES[currencyCode] || { s: currencyCode, n: currencyCode, c: 'GLOBAL', d: 'Global' };
   currentSymbol = cData.s;
-  
-  if (cData.c && COUNTRY_SUPPLIERS[cData.c]) {
-    userCountryCode = cData.c;
-    userCountryName = COUNTRY_SUPPLIERS[cData.c].name;
-    userSearchArea = cData.d || userSearchArea;
-    $('search-location-input').value = userSearchArea;
-  }
-  
   document.querySelectorAll('.currency-tag').forEach(el => el.textContent = currentSymbol);
   $('rateHeader').textContent = `Rate (${currentSymbol})`;
-  
+
   if (currencyCode === 'INR') {
     exchangeMultiplier = 1.0;
     rates = [...BASE_RATES_INR];
-    refreshAllViews();
-    return;
-  }
-  
-  try {
-    const fxRes = await fetch('https://open.er-api.com/v6/latest/INR');
-    if (!fxRes.ok) throw new Error();
-    const fxData = await fxRes.json();
-    const rate = fxData.rates && fxData.rates[currencyCode];
-    if (rate) {
-      exchangeMultiplier = rate;
-      rates = BASE_RATES_INR.map(r => +(r * rate).toFixed(2));
+  } else {
+    try {
+      const fxRes = await fetch('https://open.er-api.com/v6/latest/INR');
+      const fxData = await fxRes.json();
+      exchangeMultiplier = fxData.rates[currencyCode] || 0.012;
+      rates = BASE_RATES_INR.map(r => +(r * exchangeMultiplier).toFixed(2));
+    } catch(e) {
+      exchangeMultiplier = 0.012;
+      rates = BASE_RATES_INR.map(r => +(r * exchangeMultiplier).toFixed(2));
     }
-  } catch (e) {
-    const fallback = { USD: 0.012, EUR: 0.011, GBP: 0.0095, AED: 0.044, AUD: 0.018, CAD: 0.016, SGD: 0.016, JPY: 1.8 };
-    exchangeMultiplier = fallback[currencyCode] || 0.012;
-    rates = BASE_RATES_INR.map(r => +(r * exchangeMultiplier).toFixed(2));
   }
   refreshAllViews();
 }
 
-window.changeCurrency = function(val) {
-  updateRatesForCurrency(val);
-};
+window.changeCurrency = val => updateRatesForCurrency(val);
 
 function refreshAllViews() {
   if (plan) {
@@ -962,76 +432,152 @@ function refreshAllViews() {
   }
 }
 
-function settings(){
+function getInputs(){
   return {
-    w:clamp(+$('w').value||30,10,300),
-    d:clamp(+$('d').value||40,10,300),
-    facing:$('facing').value,
-    beds:+$('beds').value||2,
-    baths:+$('baths').value||2,
-    floors:+$('floors').value||2,
-    front:clamp(+$('front').value||0,0,30),
-    side:clamp(+$('side').value||0,0,20)
+    w: clamp(+$('w').value || 30, 10, 300),
+    d: clamp(+$('d').value || 40, 10, 300),
+    facing: $('facing').value,
+    beds: +$('beds').value || 2,
+    baths: +$('baths').value || 2,
+    floors: +$('floors').value || 2,
+    front: clamp(+$('front').value || 0, 0, 30),
+    side: clamp(+$('side').value || 0, 0, 20)
   };
 }
 
-function readPrompt(){
-  let p=settings(), s=$('prompt').value, m;
-  if((m=s.match(/(\d+(?:\.\d+)?)\s*(?:x|×|by)\s*(\d+(?:\.\d+)?)/i))){
-    p.w=clamp(+m[1],10,300); p.d=clamp(+m[2],10,300);
-    $('w').value=p.w; $('d').value=p.d;
+function parsePromptToInputs(){
+  let p = getInputs();
+  let s = $('prompt').value, m;
+  if((m = s.match(/(\d+(?:\.\d+)?)\s*(?:x|×|by)\s*(\d+(?:\.\d+)?)/i))){
+    p.w = clamp(+m[1], 10, 300);
+    p.d = clamp(+m[2], 10, 300);
+    $('w').value = p.w;
+    $('d').value = p.d;
   }
-  if((m=s.match(/(\d+)\s*(?:bedrooms?|bhk)/i))) p.beds=clamp(+m[1],1,5);
-  if((m=s.match(/(\d+)\s*(?:bathrooms?|toilets?)/i))) p.baths=clamp(+m[1],1,4);
-  if(/\b1\s*bhk\b/i.test(s)) p.beds=1;
-  if(/\b2\s*bhk\b/i.test(s)) p.beds=2;
-  if(/\b3\s*bhk\b/i.test(s)) p.beds=3;
-  if(/\b4\s*bhk\b/i.test(s)) p.beds=4;
-  ['North','South','East','West'].forEach(d=>{
-    if(new RegExp('\\b'+d+'[- ]facing\\b|\\bfacing '+d+'\\b','i').test(s)) p.facing=d;
+  if((m = s.match(/(\d+)\s*(?:bedrooms?|bhk)/i))) p.beds = clamp(+m[1], 1, 5);
+  if((m = s.match(/(\d+)\s*(?:bathrooms?|toilets?)/i))) p.baths = clamp(+m[1], 1, 4);
+  if(/\b1\s*bhk\b/i.test(s)) p.beds = 1;
+  if(/\b2\s*bhk\b/i.test(s)) p.beds = 2;
+  if(/\b3\s*bhk\b/i.test(s)) p.beds = 3;
+  if(/\b4\s*bhk\b/i.test(s)) p.beds = 4;
+  ['North','South','East','West'].forEach(d => {
+    if(new RegExp('\\b'+d+'[- ]facing\\b|\\bfacing '+d+'\\b','i').test(s)) p.facing = d;
   });
-  $('beds').value=p.beds; $('baths').value=p.baths; $('facing').value=p.facing;
+  $('beds').value = p.beds;
+  $('baths').value = p.baths;
+  $('facing').value = p.facing;
   return p;
 }
 
+function syncInputsToPrompt(p){
+  $('prompt').value = `Design a ${p.w} x ${p.d} ft ${p.facing.toLowerCase()}-facing ${p.beds}BHK house with ${p.baths} bathrooms, living room, kitchen, dining area, pooja room and staircase.`;
+}
+
 function createPlan(p){
-  let x=p.side, y=3, iw=Math.max(8,p.w-2*p.side), ih=Math.max(10,p.d-p.front-3), rooms=[];
-  const add=(name,rx,ry,rw,rh,type)=>{if(rw>1&&rh>1)rooms.push({name,x:rx,y:ry,w:rw,h:rh,type})};
-  
-  const frontH=ih*.37, left=iw*.53, right=iw-left;
-  add('Living Room',x,y,left,frontH,'living');
-  add('Dining Area',x+left,y,right*.52,frontH,'dining');
-  add('Kitchen (Agni)',x+left+right*.52,y,right*.48,frontH,'kitchen');
-  
-  const serviceW=Math.min(iw*.25,Math.max(5,iw*.22)), bedW=iw-serviceW, backH=ih-frontH;
-  const rows=Math.ceil(p.beds/2), rowH=backH/(rows+1);
-  let idx=0;
-  for(let r=0;r<rows;r++){
-    let count=Math.min(2,p.beds-idx), cw=bedW/count;
-    for(let c=0;c<count;c++){
-      add((++idx===1?'Master Bed (SW)':'Bedroom '+idx), x+c*cw, y+frontH+r*rowH, cw, rowH, 'bedroom');
+  const side = p.side;
+  const front = p.front;
+  const rear = 3;
+  const facing = p.facing;
+
+  let x = side;
+  let y = rear;
+  let iw = Math.max(12, p.w - (side * 2));
+  let ih = Math.max(14, p.d - front - rear);
+
+  let rooms = [];
+  const add = (name, rx, ry, rw, rh, type) => {
+    if(rw > 1.5 && rh > 1.5) {
+      rooms.push({ name, x: +rx.toFixed(2), y: +ry.toFixed(2), w: +rw.toFixed(2), h: +rh.toFixed(2), type });
+    }
+  };
+
+  const hasPooja = /pooja|prayer/i.test($('prompt').value);
+  const hasUtility = /utility|laundry|wash/i.test($('prompt').value);
+
+  if (facing === 'South') {
+    const entryH = ih * 0.28;
+    const midH = ih * 0.38;
+    const rearH = ih - entryH - midH;
+
+    add('Verandah / Foyer', x + iw * 0.45, y + midH + rearH, iw * 0.55, entryH, 'stair');
+    add('Master Bed (SW)', x, y + midH + rearH, iw * 0.45, entryH, 'bedroom');
+
+    add('Living Hall', x, y + rearH, iw * 0.58, midH, 'living');
+    add('Kitchen (Agni SE)', x + iw * 0.58, y + rearH, iw * 0.42, midH * 0.55, 'kitchen');
+    add('Dining Area', x + iw * 0.58, y + rearH + midH * 0.55, iw * 0.42, midH * 0.45, 'dining');
+
+    const bedCount = Math.max(1, p.beds - 1);
+    const bedW = (iw * 0.68) / bedCount;
+    for(let i=0; i<bedCount; i++){
+      add(`Bedroom ${i + 2}`, x + i * bedW, y, bedW, rearH, 'bedroom');
+    }
+
+    const bathH = rearH / Math.max(1, p.baths);
+    for(let b=0; b<p.baths; b++){
+      add(`Bath ${b + 1}`, x + iw * 0.68, y + b * bathH, iw * 0.32, bathH, 'bath');
+    }
+
+    if(hasPooja) add('Pooja (NE)', x + iw * 0.45, y, iw * 0.23, rearH * 0.4, 'pooja');
+    if(hasUtility) add('Utility', x + iw * 0.78, y + rearH + midH * 0.75, iw * 0.22, midH * 0.25, 'utility');
+  }
+  else if (facing === 'North') {
+    const frontH = ih * 0.35;
+    const midH = ih * 0.30;
+    const backH = ih - frontH - midH;
+
+    add('Entry Portico', x + iw * 0.35, y, iw * 0.65, frontH * 0.35, 'stair');
+    add('Living Room', x + iw * 0.25, y + frontH * 0.35, iw * 0.75, frontH * 0.65, 'living');
+    add('Bedroom 2', x, y, iw * 0.35, frontH, 'bedroom');
+
+    add('Dining Room', x + iw * 0.35, y + frontH, iw * 0.65, midH, 'dining');
+    if(hasPooja) add('Pooja (NE)', x + iw * 0.75, y + frontH, iw * 0.25, midH * 0.5, 'pooja');
+
+    const mBedW = iw * 0.55;
+    add('Master Bed (SW)', x, y + frontH + midH, mBedW, backH, 'bedroom');
+    add('Kitchen (SE)', x + mBedW, y + frontH + midH + backH * 0.35, iw - mBedW, backH * 0.65, 'kitchen');
+
+    const bathH = (backH * 0.35) / Math.max(1, p.baths);
+    for(let b=0; b<p.baths; b++){
+      add(`Bath ${b + 1}`, x + mBedW, y + frontH + midH + b * bathH, iw - mBedW, bathH, 'bath');
     }
   }
+  else if (facing === 'East') {
+    const colE = iw * 0.45;
+    const colW = iw - colE;
 
-  const bathRows=Math.ceil(p.baths/2), bathCols=Math.min(2,p.baths), bw=serviceW/bathCols, bh=backH/bathRows;
-  for(let i=0;i<p.baths;i++){
-    add(i===0?'Bath / Toilet':'Bath '+(i+1), x+bedW+(i%bathCols)*bw, y+frontH+Math.floor(i/bathCols)*bh, bw, bh, 'bath');
+    add('Entrance Verandah', x + colW, y, colE, ih * 0.22, 'stair');
+    add('Living Hall', x + colW * 0.3, y + ih * 0.22, colW * 0.7 + colE, ih * 0.38, 'living');
+    add('Kitchen (SE)', x + colW, y + ih * 0.60, colE, ih * 0.40, 'kitchen');
+
+    add('Bedroom 2', x, y, colW, ih * 0.45, 'bedroom');
+    add('Master Bed (SW)', x, y + ih * 0.45, colW * 0.65, ih * 0.55, 'bedroom');
+
+    const bathH = (ih * 0.55) / Math.max(1, p.baths);
+    for(let b=0; b<p.baths; b++){
+      add(`Bath ${b + 1}`, x + colW * 0.65, y + ih * 0.45 + b * bathH, colW * 0.35, bathH, 'bath');
+    }
+    if(hasPooja) add('Pooja (NE)', x + colW, y + ih * 0.22, colE * 0.4, ih * 0.18, 'pooja');
+  }
+  else {
+    const colW = iw * 0.45;
+    const colE = iw - colW;
+
+    add('West Verandah', x, y, colW, ih * 0.24, 'stair');
+    add('Drawing / Living', x, y + ih * 0.24, colW + colE * 0.4, ih * 0.42, 'living');
+    add('Master Bed (SW)', x, y + ih * 0.66, colW, ih * 0.34, 'bedroom');
+
+    add('Bedroom 2', x + colW, y, colE, ih * 0.40, 'bedroom');
+    add('Dining Space', x + colW * 0.5, y + ih * 0.40, colE * 0.8, ih * 0.26, 'dining');
+    add('Kitchen (SE)', x + colW, y + ih * 0.66, colE, ih * 0.34, 'kitchen');
+
+    const bathW = colE / Math.max(1, p.baths);
+    for(let b=0; b<p.baths; b++){
+      add(`Bath ${b + 1}`, x + colW + b * bathW, y + ih * 0.40, bathW, ih * 0.26, 'bath');
+    }
+    if(hasPooja) add('Pooja (NE)', x + colW + colE * 0.6, y, colE * 0.4, ih * 0.2, 'pooja');
   }
 
-  if(iw>18&&backH>10){
-    add('Staircase', x, y+frontH+backH-Math.min(7,backH*.28), Math.min(7,iw*.22), Math.min(7,backH*.28), 'stair');
-  }
-
-  const prompt=$('prompt').value;
-  if(/pooja|prayer/i.test(prompt)){
-    add('Pooja (NE)', x+iw*.72, y+frontH+backH*.45, iw*.22, Math.min(5,backH*.22), 'pooja');
-  }
-  if(/utility|laundry|wash/i.test(prompt)){
-    add('Utility / Wash', x+iw*.74, y+frontH+backH*.70, iw*.24, backH*.28, 'utility');
-  }
-
-  rooms=rooms.filter(r=>r.x>=x-.01&&r.y>=y-.01&&r.x+r.w<=x+iw+.1&&r.y+r.h<=y+ih+.1);
-  return {settings:p, rooms, prompt, created:new Date().toISOString()};
+  return { settings: p, rooms, prompt: $('prompt').value, created: new Date().toISOString() };
 }
 
 function el(tag,attrs={},txt){
@@ -1041,527 +587,101 @@ function el(tag,attrs={},txt){
   return e;
 }
 
-// --- 2D Floor Plan SVG Renderer ---
-function render2D(){
+function renderPlan(){
   if(!plan) return;
-  const p=plan.settings, W=p.w, D=p.d, S=12*zoom, pad=72;
-  const vw=Math.max(680,W*S+pad*2), vh=Math.max(520,D*S+pad*2);
-  const svg=el('svg',{viewBox:`0 0 ${vw} ${vh}`,role:'img','aria-label':'Concept floor plan', id:'mainFloorPlanSvg'});
-  const sx=v=>pad+v*S, sy=v=>pad+v*S;
+  const p = plan.settings, W = p.w, D = p.d, S = 12 * zoom, pad = 72;
+  const vw = Math.max(680, W * S + pad * 2), vh = Math.max(520, D * S + pad * 2);
+  const svg = el('svg', { viewBox:`0 0 ${vw} ${vh}`, role:'img', id:'mainFloorPlanSvg' });
+  const sx = v => pad + v * S, sy = v => pad + v * S;
 
-  svg.append(el('rect',{x:0,y:0,width:vw,height:vh,fill:'#f8fafc'}));
+  svg.append(el('rect', { x:0, y:0, width:vw, height:vh, fill:'#f8fafc' }));
 
   if(showGrid){
-    let g=el('g',{stroke:'#dfe6f0','stroke-width':.5});
-    for(let x=pad;x<vw-pad;x+=S/2)g.append(el('line',{x1:x,y1:pad/2,x2:x,y2:vh-pad/2}));
-    for(let y=pad/2;y<vh-pad/2;y+=S/2)g.append(el('line',{x1:pad/2,y1:y,x2:vw-pad/2,y2:y}));
+    let g = el('g', { stroke:'#dfe6f0', 'stroke-width':0.5 });
+    for(let x=pad; x<vw-pad; x+=S/2) g.append(el('line', { x1:x, y1:pad/2, x2:x, y2:vh-pad/2 }));
+    for(let y=pad/2; y<vh-pad/2; y+=S/2) g.append(el('line', { x1:pad/2, y1:y, x2:vw-pad/2, y2:y }));
     svg.append(g);
   }
 
-  svg.append(el('rect',{x:sx(0),y:sy(0),width:W*S,height:D*S,fill:'#ffffff',stroke:'#334155','stroke-width':2.5}));
-  svg.append(el('rect',{x:sx(p.side),y:sy(3),width:Math.max(1,W-2*p.side)*S,height:Math.max(1,D-p.front-3)*S,fill:'none',stroke:'#94a3b8','stroke-dasharray':'5 4'}));
+  svg.append(el('rect', { x:sx(0), y:sy(0), width:W*S, height:D*S, fill:'#ffffff', stroke:'#334155', 'stroke-width':2.5 }));
 
-  const colors={living:'#dbeafe',dining:'#fef3c7',kitchen:'#dcfce7',bedroom:'#ede9fe',bath:'#cffafe',stair:'#fce7f3',utility:'#ffedd5',pooja:'#fae8ff'};
-  
-  plan.rooms.forEach((r, idx)=>{
+  const roadPad = 28;
+  if (p.facing === 'South') {
+    svg.append(el('rect', { x:sx(0), y:sy(D)+4, width:W*S, height:roadPad, fill:'#f1f5f9', stroke:'#cbd5e1' }));
+    svg.append(el('text', { x:sx(W/2), y:sy(D)+22, 'text-anchor':'middle', 'font-size':11, 'font-weight':700, fill:'#e11d48' }, '▼ MAIN ACCESS ROAD (SOUTH) ▼'));
+  } else if (p.facing === 'North') {
+    svg.append(el('rect', { x:sx(0), y:sy(0)-roadPad-4, width:W*S, height:roadPad, fill:'#f1f5f9', stroke:'#cbd5e1' }));
+    svg.append(el('text', { x:sx(W/2), y:sy(0)-14, 'text-anchor':'middle', 'font-size':11, 'font-weight':700, fill:'#e11d48' }, '▲ MAIN ACCESS ROAD (NORTH) ▲'));
+  } else if (p.facing === 'East') {
+    svg.append(el('text', { x:sx(W)+28, y:sy(D/2), 'text-anchor':'middle', 'font-size':11, 'font-weight':700, fill:'#e11d48', transform:`rotate(90 ${sx(W)+28} ${sy(D/2)})` }, '▶ EAST ACCESS ROAD ▶'));
+  } else if (p.facing === 'West') {
+    svg.append(el('text', { x:sx(0)-24, y:sy(D/2), 'text-anchor':'middle', 'font-size':11, 'font-weight':700, fill:'#e11d48', transform:`rotate(-90 ${sx(0)-24} ${sy(D/2)})` }, '◀ WEST ACCESS ROAD ◀'));
+  }
+
+  const colors = { living:'#dbeafe', dining:'#fef3c7', kitchen:'#dcfce7', bedroom:'#ede9fe', bath:'#cffafe', stair:'#fee2e2', utility:'#ffedd5', pooja:'#fae8ff' };
+
+  plan.rooms.forEach((r, idx) => {
     const isSelected = (selectedRoomIndex === idx);
-    const rect = el('rect',{
-      x:sx(r.x),
-      y:sy(r.y),
-      width:r.w*S,
-      height:r.h*S,
-      fill:colors[r.type]||'#e2e8f0',
-      stroke:isSelected ? '#8b5cf6' : '#1e293b',
+    const rect = el('rect', {
+      x: sx(r.x),
+      y: sy(r.y),
+      width: r.w * S,
+      height: r.h * S,
+      fill: colors[r.type] || '#e2e8f0',
+      stroke: isSelected ? '#8b5cf6' : '#1e293b',
       'stroke-width': isSelected ? 4 : 2,
       class: 'room-rect' + (isSelected ? ' selected' : '')
     });
     
-    rect.onclick = (e)=>{
+    rect.onclick = (e) => {
       e.stopPropagation();
       selectRoom(idx);
     };
-
     svg.append(rect);
 
     if(showWalls){
-      svg.append(el('rect',{
-        x:sx(r.x)+2,
-        y:sy(r.y)+2,
-        width:r.w*S-4,
-        height:r.h*S-4,
-        fill:'none',
-        stroke:'#64748b',
-        'stroke-width':1.5,
-        'pointer-events':'none'
+      svg.append(el('rect', {
+        x: sx(r.x) + 2,
+        y: sy(r.y) + 2,
+        width: r.w * S - 4,
+        height: r.h * S - 4,
+        fill: 'none',
+        stroke: '#64748b',
+        'stroke-width': 1.5,
+        'pointer-events': 'none'
       }));
     }
-    
-    if(showOpenings){
-      let dx=sx(r.x+r.w*.42), dy=sy(r.y+r.h), dw=Math.min(2.8,r.w*.22)*S;
-      svg.append(el('line',{x1:dx,y1:dy,x2:dx+dw,y2:dy,stroke:'#ffffff','stroke-width':5}));
-      svg.append(el('path',{d:`M ${dx} ${dy} q ${dw} 0 ${dw} ${-dw}`,fill:'none',stroke:'#ef4444','stroke-width':1.8}));
-      svg.append(el('line',{x1:dx,y1:dy,x2:dx,y2:dy-dw,stroke:'#ef4444','stroke-width':1.5}));
 
-      if(r.y===3){
-        let wx=sx(r.x+r.w*.35), wy=sy(r.y), ww=Math.min(r.w*.32,3.5)*S;
-        svg.append(el('rect',{x:wx,y:wy-3,width:ww,height:6,fill:'#38bdf8',stroke:'#0284c7','stroke-width':1}));
-        svg.append(el('line',{x1:wx,y1:wy,x2:wx+ww,y2:wy,stroke:'#ffffff','stroke-width':1.2}));
-      }
+    if(showOpenings){
+      let dx = sx(r.x + r.w * 0.4), dy = sy(r.y + r.h), dw = Math.min(2.8, r.w * 0.25) * S;
+      svg.append(el('line', { x1:dx, y1:dy, x2:dx+dw, y2:dy, stroke:'#ffffff', 'stroke-width':5 }));
+      svg.append(el('path', { d:`M ${dx} ${dy} q ${dw} 0 ${dw} ${-dw}`, fill:'none', stroke:'#ef4444', 'stroke-width':1.8 }));
     }
-    
-    let fs=clamp(Math.min(r.w*S/Math.max(7,r.name.length*.58),r.h*S/3.5),7,12.5);
-    const textTitle = el('text',{x:sx(r.x+r.w/2),y:sy(r.y+r.h/2)-2,'text-anchor':'middle','font-size':fs,'font-family':'system-ui','font-weight':700,fill:'#172033', 'pointer-events':'none'}, r.name);
-    const textDim = el('text',{x:sx(r.x+r.w/2),y:sy(r.y+r.h/2)+fs+1,'text-anchor':'middle','font-size':Math.max(7,fs-2),fill:'#475569', 'pointer-events':'none'}, `${nfmt(r.w)} × ${nfmt(r.h)} ft`);
-    svg.append(textTitle);
-    svg.append(textDim);
+
+    let fs = clamp(Math.min(r.w * S / Math.max(7, r.name.length * 0.55), r.h * S / 3.5), 7.5, 13);
+    svg.append(el('text', { x:sx(r.x + r.w/2), y:sy(r.y + r.h/2) - 2, 'text-anchor':'middle', 'font-size':fs, 'font-weight':700, fill:'#172033', 'pointer-events':'none' }, r.name));
+    svg.append(el('text', { x:sx(r.x + r.w/2), y:sy(r.y + r.h/2) + fs + 2, 'text-anchor':'middle', 'font-size':Math.max(7, fs - 2), fill:'#475569', 'pointer-events':'none' }, `${nfmt(r.w)} × ${nfmt(r.h)} ft`));
   });
 
   if(showDims){
-    const st={stroke:'#475569','stroke-width':1,fill:'none'};
-    svg.append(el('line',{x1:sx(0),y1:sy(D)+20,x2:sx(W),y2:sy(D)+20,...st}));
-    svg.append(el('line',{x1:sx(0),y1:sy(D)+14,x2:sx(0),y2:sy(D)+26,...st}));
-    svg.append(el('line',{x1:sx(W),y1:sy(D)+14,x2:sx(W),y2:sy(D)+26,...st}));
-    svg.append(el('text',{x:sx(W/2),y:sy(D)+36,'text-anchor':'middle','font-size':12,fill:'#334155'},W+' ft'));
-    svg.append(el('line',{x1:sx(W)+20,y1:sy(0),x2:sx(W)+20,y2:sy(D),...st}));
-    svg.append(el('text',{x:sx(W)+35,y:sy(D/2),'text-anchor':'middle','font-size':12,fill:'#334155',transform:`rotate(90 ${sx(W)+35} ${sy(D/2)})`},D+' ft'));
+    const st = { stroke:'#475569', 'stroke-width':1, fill:'none' };
+    svg.append(el('line', { x1:sx(0), y1:sy(D)+40, x2:sx(W), y2:sy(D)+40, ...st }));
+    svg.append(el('text', { x:sx(W/2), y:sy(D)+54, 'text-anchor':'middle', 'font-size':12, fill:'#334155' }, W + ' ft'));
+    svg.append(el('line', { x1:sx(W)+40, y1:sy(0), x2:sx(W)+40, y2:sy(D), ...st }));
+    svg.append(el('text', { x:sx(W)+54, y:sy(D/2), 'text-anchor':'middle', 'font-size':12, fill:'#334155', transform:`rotate(90 ${sx(W)+54} ${sy(D/2)})` }, D + ' ft'));
   }
 
-  svg.append(el('text',{x:pad,y:26,'font-size':13,fill:'#1e293b','font-weight':800},'ARCHFORM · CAD CONCEPT BLUEPRINT'));
-  svg.append(el('text',{x:pad,y:44,'font-size':10.5,fill:'#64748b'},`${W} × ${D} ft Plot · ${p.facing}-Facing`));
-  
-  const dirs={North:[W/2,-1],South:[W/2,D+1],East:[W+1,D/2],West:[-1,D/2]}, [nx,ny]=dirs[p.facing];
-  svg.append(el('text',{x:sx(nx),y:sy(ny),'text-anchor':'middle','font-size':13,fill:'#7c3aed','font-weight':800},{North:'N ↑',South:'S ↓',East:'E →',West:'← W'}[p.facing]));
+  svg.append(el('text', { x:pad, y:26, 'font-size':13, fill:'#1e293b', 'font-weight':800 }, 'ARCHFORM · PROCEDURAL BLUEPRINT'));
+  svg.append(el('text', { x:pad, y:44, 'font-size':10.5, fill:'#64748b' }, `${W} × ${D} ft Plot · ${p.facing}-Facing | Vastu Compliant`));
+
+  svg.append(el('circle', { cx:vw - pad - 20, cy:40, r:16, fill:'#ffffff', stroke:'#cbd5e1', 'stroke-width':1.5 }));
+  svg.append(el('path', { d:`M ${vw - pad - 20} 28 L ${vw - pad - 14} 46 L ${vw - pad - 20} 42 L ${vw - pad - 26} 46 Z`, fill:'#ef4444' }));
+  svg.append(el('text', { x:vw - pad - 20, y:23, 'text-anchor':'middle', 'font-size':10, 'font-weight':'bold', fill:'#0f172a' }, 'N'));
 
   $('canvas').replaceChildren(svg);
   updateMetrics();
   updateBOQ();
 }
-
-// --- High-Fidelity 2D Architectural Elevation Generator ---
-function renderFacade(){
-  const cv = $('facadeCanvas');
-  const ctx = cv.getContext('2d');
-  ctx.clearRect(0,0,cv.width,cv.height);
-
-  const skyGrad = ctx.createLinearGradient(0,0,0,cv.height);
-  skyGrad.addColorStop(0, '#131b2e');
-  skyGrad.addColorStop(0.5, '#283652');
-  skyGrad.addColorStop(0.85, '#566b8c');
-  skyGrad.addColorStop(1, '#6d82a3');
-  ctx.fillStyle = skyGrad;
-  ctx.fillRect(0,0,cv.width,cv.height);
-
-  ctx.fillStyle = '#1e293b';
-  ctx.beginPath();
-  ctx.moveTo(0, 220);
-  ctx.bezierCurveTo(60, 160, 150, 180, 220, 220);
-  ctx.bezierCurveTo(740, 170, 840, 150, cv.width, 220);
-  ctx.lineTo(cv.width, 360);
-  ctx.lineTo(0, 360);
-  ctx.fill();
-
-  const groundY = cv.height - 100;
-  const paveX = 520;
-
-  const grassGrad = ctx.createLinearGradient(0, groundY, paveX, cv.height);
-  grassGrad.addColorStop(0, '#14381e');
-  grassGrad.addColorStop(1, '#0b2413');
-  ctx.fillStyle = grassGrad;
-  ctx.fillRect(0, groundY, paveX, 100);
-
-  ctx.fillStyle = '#64748b';
-  ctx.fillRect(paveX, groundY, cv.width - paveX, 100);
-  ctx.strokeStyle = '#475569';
-  ctx.lineWidth = 1;
-  for(let px = paveX; px < cv.width; px += 22){
-    for(let py = groundY; py < cv.height; py += 12){
-      ctx.strokeRect(px, py, 20, 10);
-    }
-  }
-
-  ctx.fillStyle = '#94a3b8';
-  for(let step = 0; step < 5; step++){
-    ctx.fillRect(440, groundY + step * 18, 55, 12);
-  }
-
-  const bX = 180;
-  const bY = 70;
-  const bW = 540;
-  const bH = 340;
-
-  const concGrad = ctx.createLinearGradient(bX, 0, bX + 270, 0);
-  concGrad.addColorStop(0, '#64748b');
-  concGrad.addColorStop(0.5, '#78889e');
-  concGrad.addColorStop(1, '#5a687d');
-  ctx.fillStyle = concGrad;
-  ctx.fillRect(bX, bY, 280, bH);
-  
-  ctx.strokeStyle = 'rgba(0,0,0,0.25)';
-  ctx.lineWidth = 1.5;
-  for(let cY = bY; cY < bY + bH; cY += 28){
-    ctx.beginPath();
-    ctx.moveTo(bX, cY);
-    ctx.lineTo(bX + 280, cY);
-    ctx.stroke();
-  }
-
-  const frameX = bX + 32;
-  const frameY = bY + 25;
-  const frameW = 510;
-  const frameH = 175;
-
-  ctx.fillStyle = '#f8fafc';
-  ctx.shadowColor = 'rgba(0,0,0,0.45)';
-  ctx.shadowBlur = 18;
-  ctx.shadowOffsetY = 8;
-  ctx.fillRect(frameX, frameY, frameW, frameH);
-  ctx.shadowColor = 'transparent';
-
-  const innerX = frameX + 18;
-  const innerY = frameY + 18;
-  const innerW = frameW - 36;
-  const innerH = frameH - 36;
-  ctx.fillStyle = '#1e293b';
-  ctx.fillRect(innerX, innerY, innerW, innerH);
-
-  const teakGrad = ctx.createLinearGradient(innerX, innerY, innerX, innerY + 18);
-  teakGrad.addColorStop(0, '#9a3412');
-  teakGrad.addColorStop(1, '#78350f');
-  ctx.fillStyle = teakGrad;
-  ctx.fillRect(innerX, innerY, innerW, 16);
-
-  ctx.fillStyle = '#fef08a';
-  for(let spot = 1; spot <= 4; spot++){
-    let sx = innerX + (innerW / 5) * spot;
-    ctx.beginPath();
-    ctx.arc(sx, innerY + 8, 3, 0, Math.PI * 2);
-    ctx.fill();
-
-    const coneGrad = ctx.createLinearGradient(sx, innerY + 12, sx, innerY + 100);
-    coneGrad.addColorStop(0, 'rgba(254, 240, 138, 0.35)');
-    coneGrad.addColorStop(1, 'transparent');
-    ctx.fillStyle = coneGrad;
-    ctx.beginPath();
-    ctx.moveTo(sx - 2, innerY + 12);
-    ctx.lineTo(sx + 2, innerY + 12);
-    ctx.lineTo(sx + 28, innerY + 100);
-    ctx.lineTo(sx - 28, innerY + 100);
-    ctx.fill();
-  }
-
-  ctx.fillStyle = '#0284c7';
-  ctx.fillRect(innerX + 240, innerY + 16, innerW - 240, innerH - 16);
-  ctx.fillStyle = '#fbbf24';
-  ctx.fillRect(innerX + 320, innerY + 45, 18, 14);
-  ctx.fillStyle = 'rgba(251, 191, 36, 0.2)';
-  ctx.beginPath();
-  ctx.arc(innerX + 329, innerY + 52, 35, 0, Math.PI * 2);
-  ctx.fill();
-
-  const louverW = 135;
-  ctx.fillStyle = '#9a3412';
-  for(let lx = innerX; lx < innerX + louverW; lx += 11){
-    ctx.fillRect(lx, innerY + 16, 5, innerH - 16);
-  }
-
-  ctx.fillStyle = 'rgba(147, 197, 253, 0.35)';
-  ctx.fillRect(innerX, innerY + innerH - 52, innerW, 52);
-  ctx.strokeStyle = '#38bdf8';
-  ctx.lineWidth = 1.5;
-  ctx.strokeRect(innerX, innerY + innerH - 52, innerW, 52);
-
-  const gLivingX = frameX + 22;
-  const gLivingY = frameY + frameH + 10;
-  const gLivingW = 220;
-  const gLivingH = groundY - gLivingY;
-
-  const glowGrad = ctx.createLinearGradient(gLivingX, gLivingY, gLivingX + gLivingW, gLivingY + gLivingH);
-  glowGrad.addColorStop(0, '#fed7aa');
-  glowGrad.addColorStop(0.6, '#fbbf24');
-  glowGrad.addColorStop(1, '#9a3412');
-  ctx.fillStyle = glowGrad;
-  ctx.fillRect(gLivingX, gLivingY, gLivingW, gLivingH);
-
-  ctx.strokeStyle = '#0f172a';
-  ctx.lineWidth = 3;
-  ctx.strokeRect(gLivingX, gLivingY, gLivingW, gLivingH);
-  ctx.beginPath();
-  ctx.moveTo(gLivingX + gLivingW / 2, gLivingY);
-  ctx.lineTo(gLivingX + gLivingW / 2, gLivingY + gLivingH);
-  ctx.stroke();
-
-  ctx.fillStyle = '#fef08a';
-  ctx.beginPath();
-  ctx.arc(gLivingX + 65, gLivingY + 45, 11, 0, Math.PI * 2);
-  ctx.arc(gLivingX + 115, gLivingY + 55, 9, 0, Math.PI * 2);
-  ctx.fill();
-
-  const doorX = gLivingX + gLivingW + 28;
-  const doorW = 55;
-  const doorH = groundY - gLivingY;
-  ctx.fillStyle = '#fffbeb';
-  ctx.fillRect(doorX, gLivingY, doorW, doorH);
-  ctx.fillStyle = '#78350f';
-  ctx.fillRect(doorX + 8, gLivingY + 12, doorW - 16, doorH - 12);
-
-  const porticoX = doorX + doorW + 20;
-  const porticoY = gLivingY + 15;
-  const porticoW = 280;
-  const porticoH = 14;
-
-  ctx.fillStyle = '#334155';
-  ctx.fillRect(porticoX, porticoY, porticoW, porticoH);
-  ctx.fillStyle = '#1e293b';
-  ctx.fillRect(porticoX + porticoW - 25, porticoY, 14, groundY - porticoY);
-
-  ctx.fillStyle = '#fef08a';
-  for(let cp = 1; cp <= 3; cp++){
-    ctx.beginPath();
-    ctx.arc(porticoX + cp * 60, porticoY + porticoH + 2, 2.5, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  const carX = porticoX + 45;
-  const carY = groundY - 60;
-  ctx.fillStyle = '#0f172a';
-  ctx.beginPath();
-  ctx.roundRect(carX, carY + 15, 110, 35, [8, 8, 4, 4]);
-  ctx.roundRect(carX + 15, carY, 80, 25, [14, 14, 0, 0]);
-  ctx.fill();
-
-  ctx.fillStyle = '#1e293b';
-  ctx.beginPath();
-  ctx.arc(carX + 25, groundY - 10, 11, 0, Math.PI * 2);
-  ctx.arc(carX + 85, groundY - 10, 11, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = '#cbd5e1';
-  ctx.fillRect(porticoX + porticoW - 10, groundY - 75, 120, 75);
-  ctx.fillStyle = '#334155';
-  ctx.fillRect(porticoX + porticoW + 15, groundY - 70, 70, 70);
-
-  ctx.fillStyle = '#166534';
-  for(let pl = 0; pl < 12; pl++){
-    let px = bX + pl * 34;
-    ctx.beginPath();
-    ctx.arc(px, groundY - 8, 14 + (pl % 3) * 4, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.fillStyle = '#14532d';
-  ctx.beginPath();
-  ctx.arc(bX - 25, groundY - 45, 32, 0, Math.PI * 2);
-  ctx.arc(bX - 45, groundY - 30, 24, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = '#fef08a';
-  ctx.beginPath();
-  ctx.arc(bX + 50, groundY - 2, 3, 0, Math.PI * 2);
-  ctx.arc(bX + 220, groundY - 2, 3, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 13px system-ui';
-  ctx.fillText('ARCHFORM 2D ELEVATION · CONTEMPORARY VILLA FACADE (1:100)', 40, 40);
-}
-
-// --- 3D WebGL Building Model Engine (Three.js) ---
-let scene, camera, renderer, buildingGroup, is3DInit = false;
-let isTouring = false, tourAngle = 0;
-let mediaRecorder = null, recordedChunks = [];
-
-function init3D(){
-  if(is3DInit) return;
-  const container = $('three-viewport');
-  const width = container.clientWidth || 800;
-  const height = container.clientHeight || 500;
-
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x090e1d);
-
-  camera = new THREE.PerspectiveCamera(45, width/height, 0.1, 1000);
-  camera.position.set(45, 35, 55);
-  camera.lookAt(0, 5, 0);
-
-  renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
-  renderer.setSize(width, height);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.shadowMap.enabled = true;
-  container.appendChild(renderer.domElement);
-
-  const hemi = new THREE.HemisphereLight(0xffffff, 0x334466, 0.9);
-  scene.add(hemi);
-  const dir = new THREE.DirectionalLight(0xfffaed, 1.2);
-  dir.position.set(40, 60, 30);
-  dir.castShadow = true;
-  scene.add(dir);
-
-  const grid = new THREE.GridHelper(100, 40, 0x22d3ee, 0x1e293b);
-  grid.position.y = -0.1;
-  scene.add(grid);
-
-  buildingGroup = new THREE.Group();
-  scene.add(buildingGroup);
-
-  let isDown = false, prev = {x:0, y:0};
-  container.addEventListener('mousedown', e=>{ isDown=true; prev={x:e.clientX, y:e.clientY}; });
-  window.addEventListener('mouseup', ()=>isDown=false);
-  container.addEventListener('mousemove', e=>{
-    if(!isDown || isTouring) return;
-    const dx = e.clientX - prev.x;
-    const dy = e.clientY - prev.y;
-    buildingGroup.rotation.y += dx * 0.01;
-    buildingGroup.rotation.x = clamp(buildingGroup.rotation.x + dy * 0.005, -0.3, 0.7);
-    prev = {x:e.clientX, y:e.clientY};
-  });
-  container.addEventListener('wheel', e=>{
-    camera.position.z = clamp(camera.position.z + e.deltaY * 0.05, 20, 110);
-  });
-
-  is3DInit = true;
-  animate3D();
-}
-
-function update3DModel(){
-  if(!plan || !buildingGroup) return;
-  while(buildingGroup.children.length > 0) buildingGroup.remove(buildingGroup.children[0]);
-
-  const p = plan.settings;
-  const S = 0.5;
-  const floorHeight = 4.2;
-
-  const wallMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.3 });
-  const concreteMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.6 });
-  const woodMat = new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.4 });
-  const slabMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 });
-  const glassMat = new THREE.MeshPhysicalMaterial({ color: 0x38bdf8, transmission: 0.75, transparent: true, opacity: 0.6 });
-
-  const plinthGeo = new THREE.BoxGeometry(p.w * S + 4, 0.8, p.d * S + 4);
-  const plinth = new THREE.Mesh(plinthGeo, slabMat);
-  plinth.position.set(0, 0.4, 0);
-  buildingGroup.add(plinth);
-
-  const pylonGeo = new THREE.BoxGeometry(4, floorHeight * 2, p.d * S);
-  const pylon = new THREE.Mesh(pylonGeo, concreteMat);
-  pylon.position.set(-p.w * S / 2 + 1, floorHeight + 0.8, 0);
-  buildingGroup.add(pylon);
-
-  plan.rooms.forEach((r)=>{
-    const rw = r.w * S;
-    const rd = r.h * S;
-    const rx = (r.x - p.w/2 + r.w/2) * S;
-    const rz = (r.y - p.d/2 + r.h/2) * S;
-
-    const wallBoxGeo = new THREE.BoxGeometry(rw - 0.2, floorHeight, rd - 0.2);
-    const wallMesh = new THREE.Mesh(wallBoxGeo, wallMat);
-    wallMesh.position.set(rx, floorHeight/2 + 0.8, rz);
-    buildingGroup.add(wallMesh);
-
-    if(r.y === 3){
-      const winGeo = new THREE.BoxGeometry(Math.min(rw * 0.7, 4.5), 2.2, 0.4);
-      const winMesh = new THREE.Mesh(winGeo, glassMat);
-      winMesh.position.set(rx, floorHeight/2 + 0.8, rz - rd/2);
-      buildingGroup.add(winMesh);
-    }
-  });
-
-  const uGeo = new THREE.BoxGeometry(p.w * S - 2, floorHeight, p.d * S - 2);
-  const uMesh = new THREE.Mesh(uGeo, wallMat);
-  uMesh.position.set(1.5, floorHeight * 1.5 + 0.8, 0);
-  buildingGroup.add(uMesh);
-
-  const louGeo = new THREE.BoxGeometry(4.5, floorHeight - 0.4, 0.3);
-  const louMesh = new THREE.Mesh(louGeo, woodMat);
-  louMesh.position.set(-2, floorHeight * 1.5 + 0.8, -p.d * S / 2 + 0.8);
-  buildingGroup.add(louMesh);
-
-  const railGeo = new THREE.BoxGeometry(p.w * S - 4, 1.2, 0.2);
-  const railMesh = new THREE.Mesh(railGeo, glassMat);
-  railMesh.position.set(1, floorHeight + 1.4, -p.d * S / 2 + 0.8);
-  buildingGroup.add(railMesh);
-
-  const carGeo = new THREE.BoxGeometry(8, 0.4, 10);
-  const canopy = new THREE.Mesh(carGeo, slabMat);
-  canopy.position.set(p.w * S / 2 + 1, floorHeight + 0.2, -p.d * S / 4);
-  buildingGroup.add(canopy);
-}
-
-function animate3D(){
-  requestAnimationFrame(animate3D);
-  if(isTouring && buildingGroup){
-    tourAngle += 0.012;
-    camera.position.x = Math.sin(tourAngle) * 55;
-    camera.position.z = Math.cos(tourAngle) * 55;
-    camera.position.y = 28 + Math.sin(tourAngle * 2) * 6;
-    camera.lookAt(0, 4, 0);
-  }
-  if(renderer && scene && camera){
-    renderer.render(scene, camera);
-  }
-}
-
-// --- Viewport Mode Switcher ---
-window.setViewMode = function(mode){
-  currentViewMode = mode;
-  $('btn-mode-2d').className = 'view-btn' + (mode==='2d'?' active':'');
-  $('btn-mode-facade').className = 'view-btn' + (mode==='facade'?' active':'');
-  $('btn-mode-3d').className = 'view-btn' + (mode==='3d'?' active':'');
-
-  $('canvas').style.display = mode === '2d' ? 'block' : 'none';
-  $('facade-viewport').style.display = mode === 'facade' ? 'block' : 'none';
-  $('three-viewport').style.display = mode === '3d' ? 'block' : 'none';
-  $('cad-toolbar-strip').style.display = mode === '2d' ? 'flex' : 'none';
-
-  if(mode === 'facade') renderFacade();
-  if(mode === '3d'){
-    init3D();
-    update3DModel();
-  }
-};
-
-window.toggleWalkthrough = function(){
-  setViewMode('3d');
-  isTouring = !isTouring;
-  $('btn-tour').textContent = isTouring ? '⏹ Stop Walkthrough' : '🎬 3D Walkthrough Tour';
-  $('btn-tour').classList.toggle('active', isTouring);
-};
-
-window.toggleRecordVideo = function(){
-  setViewMode('3d');
-  if(!is3DInit) init3D();
-
-  if(!mediaRecorder || mediaRecorder.state === 'inactive'){
-    const canvasElement = $('three-viewport').querySelector('canvas');
-    if(!canvasElement){ alert("3D Viewport canvas unavailable."); return; }
-
-    const stream = canvasElement.captureStream(30);
-    recordedChunks = [];
-    try {
-      mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
-    } catch (e) {
-      mediaRecorder = new MediaRecorder(stream);
-    }
-
-    mediaRecorder.ondataavailable = e => { if(e.data.size > 0) recordedChunks.push(e.data); };
-    mediaRecorder.onstop = () => {
-      const blob = new Blob(recordedChunks, { type: 'video/webm' });
-      download(blob, 'archform-building-walkthrough.webm');
-      $('recBadge').style.display = 'none';
-      $('btn-record').textContent = '🎥 Record Walkthrough Video';
-      $('btn-record').classList.remove('active');
-      isTouring = false;
-      $('btn-tour').textContent = '🎬 3D Walkthrough Tour';
-    };
-
-    mediaRecorder.start();
-    isTouring = true;
-    $('recBadge').style.display = 'flex';
-    $('btn-record').textContent = '⏹ Stop & Download Video';
-    $('btn-record').classList.add('active');
-    $('btn-tour').textContent = '⏹ Stop Walkthrough';
-  } else if(mediaRecorder.state === 'recording'){
-    mediaRecorder.stop();
-  }
-};
 
 window.selectRoom = function(idx){
   selectedRoomIndex = idx;
@@ -1571,14 +691,14 @@ window.selectRoom = function(idx){
   $('edit-room-type').value = room.type;
   $('edit-room-w').value = room.w;
   $('edit-room-h').value = room.h;
-  $('status').textContent = `Editing: ${room.name}. Update values and tap Apply.`;
-  render2D();
+  $('status').textContent = `Selected: ${room.name}. Update values and tap Apply.`;
+  renderPlan();
 };
 
 window.closeRoomEditor = function(){
   $('roomEditor').classList.remove('active');
   selectedRoomIndex = null;
-  render2D();
+  renderPlan();
 };
 
 window.applyRoomEdit = function(){
@@ -1588,195 +708,141 @@ window.applyRoomEdit = function(){
   room.type = $('edit-room-type').value;
   room.w = Math.max(2, parseFloat($('edit-room-w').value) || room.w);
   room.h = Math.max(2, parseFloat($('edit-room-h').value) || room.h);
-  $('status').textContent = `Updated ${room.name} successfully.`;
-  render2D();
-  if(is3DInit) update3DModel();
-  if(currentViewMode === 'facade') renderFacade();
+  $('status').textContent = `Updated ${room.name}.`;
+  renderPlan();
 };
 
 function area(r){return r.w*r.h}
 function roomArea(){return plan.rooms.reduce((s,r)=>s+area(r),0)}
 
 function materialData(){
-  let a=roomArea()*plan.settings.floors, per=plan.rooms.reduce((s,r)=>s+2*(r.w+r.h),0)*.42*plan.settings.floors;
+  let a = roomArea() * plan.settings.floors;
+  let per = plan.rooms.reduce((s,r)=>s+2*(r.w+r.h),0) * 0.42 * plan.settings.floors;
   return [
-    {key:'cement', name:'Cement (50kg bags)',qty:Math.max(1,a*.38),rate:rates[0],unit:'bags'},
-    {key:'steel', name:'TMT Structural Steel',qty:Math.max(1,a*3.4),rate:rates[1],unit:'kg'},
-    {key:'bricks', name:'Red Clay Bricks / AAC Blocks',qty:Math.max(1,per*9),rate:rates[2],unit:'nos'},
-    {key:'flooring', name:'Vitrified Flooring & Skirting',qty:a,rate:rates[3],unit:'ft²'},
-    {key:'paint', name:'Internal/External Paint',qty:a*2.7,rate:rates[4],unit:'ft²'},
-    {key:'hardware', name:'Doors, Windows & Hardware',qty:1,rate:rates[5],unit:'lump sum'}
+    {key:'cement', name:'Cement (50kg bags)', qty:Math.max(1, a*0.38), rate:rates[0], unit:'bags'},
+    {key:'steel', name:'TMT Structural Steel', qty:Math.max(1, a*3.4), rate:rates[1], unit:'kg'},
+    {key:'bricks', name:'Red Clay Bricks / AAC Blocks', qty:Math.max(1, per*9), rate:rates[2], unit:'nos'},
+    {key:'flooring', name:'Vitrified Flooring & Skirting', qty:a, rate:rates[3], unit:'ft²'},
+    {key:'paint', name:'Internal/External Paint', qty:a*2.7, rate:rates[4], unit:'ft²'},
+    {key:'hardware', name:'Doors, Windows & Hardware', qty:1, rate:rates[5], unit:'lump sum'}
   ];
 }
 
 function totalCost(){
-  let rows=materialData(), base=rows.reduce((s,r)=>s+r.qty*r.rate,0);
-  let lPct=clamp(+$('labour').value||0,0,100)/100;
-  return {base, labor:base*lPct, total:base*(1+lPct)};
+  let rows = materialData(), base = rows.reduce((s,r)=>s+r.qty*r.rate, 0);
+  let lPct = clamp(+$('labour').value||0, 0, 100)/100;
+  return { base, labor: base * lPct, total: base * (1 + lPct) };
 }
 
 function updateMetrics(){
-  $('plotArea').textContent=nfmt(plan.settings.w*plan.settings.d)+' ft²';
-  $('builtArea').textContent=nfmt(roomArea()*plan.settings.floors)+' ft²';
-  $('elemCount').textContent=`${plan.rooms.length} Rooms | ${plan.rooms.length*4} Walls`;
-  $('total').textContent=cash(totalCost().total);
+  $('plotArea').textContent = nfmt(plan.settings.w * plan.settings.d) + ' ft²';
+  $('builtArea').textContent = nfmt(roomArea() * plan.settings.floors) + ' ft²';
+  $('elemCount').textContent = `${plan.rooms.length} Rooms | ${plan.rooms.length*4} Walls`;
+  $('total').textContent = cash(totalCost().total);
 }
 
 function updateBOQ(){
-  const data=materialData();
+  const data = materialData();
   $('boq').replaceChildren();
   data.forEach((r,i)=>{
-    let tr=document.createElement('tr');
-    tr.innerHTML=`
+    let tr = document.createElement('tr');
+    tr.innerHTML = `
       <td><strong>${r.name}</strong></td>
       <td>${nfmt(r.qty)} ${r.unit}</td>
       <td><input type="number" min="0" step="any" value="${r.rate}" aria-label="Rate for ${r.name}" data-rate="${i}"></td>
       <td>${cash(r.qty*r.rate)}</td>
       <td>
-        <button class="small primary" onclick="showVendors('${r.key}')">🌐 Online Retailers</button>
+        <button class="small primary" onclick="showVendors('${r.key}')">🌐 Retailers</button>
         <button class="small gis" onclick="locateSuppliersOnMap('${r.key}')">📍 Maps</button>
       </td>
     `;
     $('boq').append(tr);
   });
   
-  $('boq').querySelectorAll('[data-rate]').forEach(inp=>inp.addEventListener('input',()=>{
-    rates[+inp.dataset.rate]=Math.max(0,+inp.value||0);
+  $('boq').querySelectorAll('[data-rate]').forEach(inp => inp.addEventListener('input', () => {
+    rates[+inp.dataset.rate] = Math.max(0, +inp.value || 0);
     updateBOQ();
     updateMetrics();
   }));
-  let t=totalCost();
-  $('boqSummary').textContent=`Base Materials: ${cash(t.base)} · Labour/Contingency: ${cash(t.labor)} · Total Forecast: ${cash(t.total)}.`;
+  let t = totalCost();
+  $('boqSummary').textContent = `Base Materials: ${cash(t.base)} · Labour: ${cash(t.labor)} · Total Forecast: ${cash(t.total)}.`;
 }
 
-// Online-Only Verified Retailers Modal View
 window.showVendors = function(key){
   const countryData = getActiveCountrySourcing();
   const v = countryData[key] || COUNTRY_SUPPLIERS.GLOBAL[key];
   if(!v) return;
-  const box = $('vendorBox');
   $('vendorTitle').innerText = `${countryData.name} Online Sourcing: ${v.title}`;
-  
-  let html = `<div><strong style="color:var(--cyan);">🌐 Major Online Portals & Platforms (${countryData.name}):</strong>`;
-  (v.online || []).forEach(on=>{
+  let html = `<div><strong style="color:var(--cyan);">🌐 Major Online Portals (${countryData.name}):</strong>`;
+  (v.online || []).forEach(on => {
     html += `<div style="margin-top:6px; background:#121b30; padding:10px; border-radius:6px; border:1px solid var(--line); display:flex; justify-content:space-between; align-items:center;">
       <div style="font-weight:700; color:#fff;">${on.name}</div>
       <div><a href="${on.site}" target="_blank" style="color:var(--cyan); text-decoration:underline; font-size:12px;">Visit Website ↗</a></div>
     </div>`;
   });
   html += `</div>`;
-
   $('vendorContent').innerHTML = html;
-  box.classList.add('active');
+  $('vendorBox').classList.add('active');
 };
 
-window.closeVendorBox = function(){
-  $('vendorBox').classList.remove('active');
-};
+window.closeVendorBox = () => $('vendorBox').classList.remove('active');
 
-function generate(){
-  let p=readPrompt();
-  plan=createPlan(p);
+function generateFromPrompt(){
+  let p = parsePromptToInputs();
+  executePlanGeneration(p);
+}
+
+function generateFromSettings(){
+  let p = getInputs();
+  syncInputsToPrompt(p);
+  executePlanGeneration(p);
+}
+
+function executePlanGeneration(p){
+  plan = createPlan(p);
   selectedRoomIndex = null;
   $('roomEditor').classList.remove('active');
-  zoom=1;
-  render2D();
-  renderFacade();
-  if(is3DInit) update3DModel();
+  zoom = 1;
+  renderPlan();
+  $('status').textContent = `Generated ${p.w}x${p.d} ft ${p.facing}-Facing layout.`;
 }
 
-function download(blob,name){
-  let url=URL.createObjectURL(blob), a=document.createElement('a');
-  a.href=url; a.download=name; a.click();
-  setTimeout(()=>URL.revokeObjectURL(url),1000);
+function download(blob, name){
+  let url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-// --- Material Suppliers Google Maps Integration ---
-window.openMapModal=function(){
+window.openMapModal = function(){
   $('mapModal').classList.add('active');
   searchBoqSuppliers();
 };
-window.closeMapModal=function(){
-  $('mapModal').classList.remove('active');
-};
+window.closeMapModal = () => $('mapModal').classList.remove('active');
 
 window.locateSuppliersOnMap = function(materialKey){
   const countryData = getActiveCountrySourcing();
   const v = countryData[materialKey] || COUNTRY_SUPPLIERS.GLOBAL[materialKey];
-  if(v && v.query){
-    $('boq-material-filter').value = v.query;
-  }
+  if(v && v.query) $('boq-material-filter').value = v.query;
   openMapModal();
 };
 
 window.searchBoqSuppliers = function(){
   const area = $('search-location-input').value.trim() || userSearchArea;
   const materialType = $('boq-material-filter').value;
-  const query = `${materialType} in ${area}`;
-  $('gis-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=m&z=13&ie=UTF8&iwloc=&output=embed`;
+  $('gis-iframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(`${materialType} in ${area}`)}&t=m&z=13&ie=UTF8&iwloc=&output=embed`;
 };
 
-$('search-location-input').addEventListener('keydown', (e)=>{
-  if(e.key === 'Enter') searchBoqSuppliers();
-});
+$('search-location-input').addEventListener('keydown', e => { if(e.key === 'Enter') searchBoqSuppliers(); });
+$('walls').onclick = () => { showWalls = !showWalls; $('walls').textContent = 'Walls: ' + (showWalls?'on':'off'); renderPlan(); };
+$('openings').onclick = () => { showOpenings = !showOpenings; $('openings').textContent = 'Doors/Windows: ' + (showOpenings?'on':'off'); renderPlan(); };
 
-$('walls').onclick=()=>{
-  showWalls=!showWalls;
-  $('walls').textContent='Walls: '+(showWalls?'on':'off');
-  render2D();
-};
-$('openings').onclick=()=>{
-  showOpenings=!showOpenings;
-  $('openings').textContent='Doors/Windows: '+(showOpenings?'on':'off');
-  render2D();
-};
-
-// --- High-Resolution Presentation Photo Generator (Localized Currency) ---
-function exportPresentationPhoto() {
-  if(!plan){ alert("Please generate a floor plan first."); return; }
-
-  $('status').textContent = "Rendering high-resolution presentation photo...";
-
-  renderFacade();
-  const facadeCv = $('facadeCanvas');
-
+function exportBlueprintSheet() {
+  if(!plan){ alert("Generate a floor plan first."); return; }
+  $('status').textContent = "Exporting blueprint sheet...";
   const outCv = document.createElement('canvas');
-  outCv.width = 2400;
-  outCv.height = 1600;
+  outCv.width = 1800; outCv.height = 1200;
   const ctx = outCv.getContext('2d');
-
-  ctx.fillStyle = '#090e1d';
-  ctx.fillRect(0, 0, outCv.width, outCv.height);
-
-  ctx.strokeStyle = '#2c3b58';
-  ctx.lineWidth = 4;
-  ctx.strokeRect(30, 30, outCv.width - 60, outCv.height - 60);
-  ctx.strokeStyle = '#22d3ee';
-  ctx.lineWidth = 1.5;
-  ctx.strokeRect(36, 36, outCv.width - 72, outCv.height - 72);
-
-  ctx.fillStyle = '#121b30';
-  ctx.fillRect(40, 40, outCv.width - 80, 130);
-  ctx.strokeStyle = '#2c3b58';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(40, 40, outCv.width - 80, 130);
-
-  ctx.fillStyle = '#edf3ff';
-  ctx.font = 'bold 38px system-ui';
-  ctx.fillText('ARCHFORM ARCHITECTURAL SUITE', 80, 95);
-
-  ctx.fillStyle = '#22d3ee';
-  ctx.font = 'bold 16px system-ui';
-  ctx.fillText(`VERIFIED 2D BLUEPRINT · CONTEMPORARY ELEVATION · MATERIAL BOQ (${currentCurrency})`, 80, 130);
-
-  const p = plan.settings;
-  ctx.fillStyle = '#9cabc6';
-  ctx.font = '16px system-ui';
-  ctx.textAlign = 'right';
-  ctx.fillText(`Plot Dimension: ${p.w} × ${p.d} ft (${p.w * p.d} sq.ft) | Facing: ${p.facing}`, outCv.width - 80, 80);
-  ctx.fillText(`Currency: ${currentCurrency} (${currentSymbol}) | Region: ${userSearchArea}`, outCv.width - 80, 108);
-  ctx.fillText(`Date: ${new Date().toLocaleDateString()}`, outCv.width - 80, 136);
-  ctx.textAlign = 'left';
+  ctx.fillStyle = '#090e1d'; ctx.fillRect(0,0,outCv.width,outCv.height);
 
   const planSvg = $('canvas').querySelector('svg');
   const svgData = new XMLSerializer().serializeToString(planSvg);
@@ -1785,106 +851,39 @@ function exportPresentationPhoto() {
   const planImg = new Image();
 
   planImg.onload = () => {
-    ctx.fillStyle = '#121b30';
-    ctx.fillRect(50, 190, 1120, 840);
-    ctx.strokeStyle = '#2c3b58';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(50, 190, 1120, 840);
-
-    ctx.fillStyle = '#edf3ff';
-    ctx.font = 'bold 20px system-ui';
-    ctx.fillText('1. GROUND CONCEPT FLOOR PLAN (1:100)', 70, 230);
-    ctx.drawImage(planImg, 70, 250, 1080, 750);
-
-    ctx.fillStyle = '#121b30';
-    ctx.fillRect(1200, 190, 1150, 840);
-    ctx.strokeStyle = '#2c3b58';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(1200, 190, 1150, 840);
-
-    ctx.fillStyle = '#edf3ff';
-    ctx.font = 'bold 20px system-ui';
-    ctx.fillText('2. FRONT 2D ARCHITECTURAL ELEVATION', 1220, 230);
-    ctx.drawImage(facadeCv, 1220, 250, 1110, 750);
-
-    ctx.fillStyle = '#121b30';
-    ctx.fillRect(50, 1050, outCv.width - 100, 480);
-    ctx.strokeStyle = '#2c3b58';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(50, 1050, outCv.width - 100, 480);
-
-    ctx.fillStyle = '#edf3ff';
-    ctx.font = 'bold 20px system-ui';
-    ctx.fillText(`3. MATERIAL ESTIMATE & QUANTITIES (BOQ in ${currentCurrency})`, 70, 1095);
-
-    ctx.fillStyle = '#18243d';
-    ctx.fillRect(70, 1115, outCv.width - 140, 40);
-    ctx.fillStyle = '#9cabc6';
-    ctx.font = 'bold 16px system-ui';
-    ctx.fillText('Item Description / Trade', 90, 1142);
-    ctx.fillText('Calculated Quantity', 850, 1142);
-    ctx.fillText(`Unit Rate (${currentSymbol})`, 1400, 1142);
-    ctx.fillText(`Total Forecast (${currentCurrency})`, 1950, 1142);
-
-    const data = materialData();
-    data.forEach((r, idx) => {
-      let rowY = 1185 + idx * 42;
-      ctx.fillStyle = idx % 2 === 0 ? 'rgba(255,255,255,0.03)' : 'transparent';
-      ctx.fillRect(70, rowY - 26, outCv.width - 140, 40);
-
-      ctx.fillStyle = '#edf3ff';
-      ctx.font = '16px system-ui';
-      ctx.fillText(r.name, 90, rowY);
-      ctx.fillText(`${nfmt(r.qty)} ${r.unit}`, 850, rowY);
-      ctx.fillText(`${currentSymbol} ${r.rate}`, 1400, rowY);
-      ctx.fillText(cash(r.qty * r.rate), 1950, rowY);
-    });
-
-    const cost = totalCost();
-    const botY = 1465;
-    ctx.fillStyle = '#1e293b';
-    ctx.fillRect(70, botY, outCv.width - 140, 45);
-    ctx.fillStyle = '#86efac';
-    ctx.font = 'bold 18px system-ui';
-    ctx.fillText(`Labour Allowance (${$('labour').value}%): ${cash(cost.labor)}`, 90, botY + 28);
-    ctx.textAlign = 'right';
-    ctx.fillText(`ESTIMATED STRUCTURAL TOTAL: ${cash(cost.total)}`, outCv.width - 100, botY + 28);
-    ctx.textAlign = 'left';
-
-    outCv.toBlob((blob) => {
-      download(blob, `archform-presentation-${currentCurrency.toLowerCase()}.png`);
+    ctx.drawImage(planImg, 60, 60, 1680, 1080);
+    outCv.toBlob(blob => {
+      download(blob, `archform-${plan.settings.facing.toLowerCase()}-blueprint.png`);
       URL.revokeObjectURL(svgUrl);
-      $('status').textContent = 'Presentation photo downloaded successfully.';
+      $('status').textContent = 'Blueprint sheet downloaded.';
     }, 'image/png');
   };
-
   planImg.src = svgUrl;
 }
 
-// --- Event Wiring ---
-$('pdf').onclick = exportPresentationPhoto;
-$('openBoqMap').onclick=window.openMapModal;
-$('generate').onclick=generate;
-$('regenerate').onclick=generate;
-document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{
-  $('prompt').value=b.dataset.p;
-  generate();
+// Bindings
+$('pdf').onclick = exportBlueprintSheet;
+$('openBoqMap').onclick = window.openMapModal;
+$('generate').onclick = generateFromPrompt;
+$('regenerate').onclick = generateFromSettings;
+
+$('facing').onchange = generateFromSettings;
+$('w').oninput = generateFromSettings;
+$('d').oninput = generateFromSettings;
+$('beds').onchange = generateFromSettings;
+$('baths').onchange = generateFromSettings;
+
+document.querySelectorAll('[data-p]').forEach(b => b.onclick = () => {
+  $('prompt').value = b.dataset.p;
+  generateFromPrompt();
 });
 
-$('save').onclick=()=>{
-  if(!plan){$('status').textContent='Generate a plan first.';return;}
-  download(new Blob([JSON.stringify({
-    app:'Archform',
-    version:7,
-    currency:currentCurrency,
-    rates,
-    plan,
-    labour:$('labour').value
-  },null,2)],{type:'application/json'}),'archform-plan.json');
+$('save').onclick = () => {
+  if(!plan) return;
+  download(new Blob([JSON.stringify({ app:'Archform', plan, rates }, null, 2)], { type:'application/json' }), 'archform-plan.json');
 };
 
-$('open').onclick = () => { $('file').click(); };
-
+$('open').onclick = () => $('file').click();
 $('file').onchange = (e) => {
   const file = e.target.files && e.target.files[0];
   if(!file) return;
@@ -1892,56 +891,33 @@ $('file').onchange = (e) => {
   reader.onload = () => {
     try {
       const data = JSON.parse(reader.result);
-      if(!data.plan || !data.plan.settings || !Array.isArray(data.plan.rooms)) throw new Error();
       plan = data.plan;
-      if (data.currency && ALL_WORLD_CURRENCIES[data.currency]) {
-        currentCurrency = data.currency;
-        $('userCurrency').value = currentCurrency;
-        currentSymbol = ALL_WORLD_CURRENCIES[currentCurrency].s;
-      }
-      rates = Array.isArray(data.rates) ? data.rates : rates;
-      const p = plan.settings;
-      $('w').value = p.w;
-      $('d').value = p.d;
-      $('facing').value = p.facing;
-      $('beds').value = p.beds;
-      $('baths').value = p.baths;
-      $('floors').value = p.floors;
-      $('front').value = p.front;
-      $('side').value = p.side;
-      $('prompt').value = plan.prompt || '';
-      $('labour').value = data.labour || 18;
-      
-      render2D();
-      renderFacade();
-      if(is3DInit) update3DModel();
-      $('status').textContent = 'Project loaded successfully.';
-    } catch(err) {
-      alert("Invalid Archform JSON project file.");
-    }
-    e.target.value = '';
+      $('w').value = plan.settings.w;
+      $('d').value = plan.settings.d;
+      $('facing').value = plan.settings.facing;
+      renderPlan();
+    } catch(err) { alert("Invalid JSON file."); }
   };
   reader.readAsText(file);
 };
 
-$('svgExport').onclick=()=>{
-  let svg=$('canvas').querySelector('svg');
-  if(!svg){$('status').textContent='Generate a plan first.';return;}
-  let clone=svg.cloneNode(true);
-  clone.setAttribute('xmlns',NS);
-  download(new Blob([new XMLSerializer().serializeToString(clone)],{type:'image/svg+xml;charset=utf-8'}),'archform-floor-plan.svg');
+$('svgExport').onclick = () => {
+  let svg = $('canvas').querySelector('svg');
+  if(!svg) return;
+  let clone = svg.cloneNode(true);
+  clone.setAttribute('xmlns', NS);
+  download(new Blob([new XMLSerializer().serializeToString(clone)], { type:'image/svg+xml;charset=utf-8' }), 'archform-floor-plan.svg');
 };
 
-$('zin').onclick=()=>{zoom=Math.min(2.5,zoom*1.15);render2D()};
-$('zout').onclick=()=>{zoom=Math.max(.55,zoom/1.15);render2D()};
-$('fit').onclick=()=>{zoom=1;render2D()};
+$('zin').onclick = () => { zoom = Math.min(2.5, zoom*1.15); renderPlan(); };
+$('zout').onclick = () => { zoom = Math.max(0.55, zoom/1.15); renderPlan(); };
+$('fit').onclick = () => { zoom = 1; renderPlan(); };
+$('dims').onclick = () => { showDims = !showDims; $('dims').textContent = 'Dimensions: ' + (showDims?'on':'off'); renderPlan(); };
+$('grid').onclick = () => { showGrid = !showGrid; $('grid').textContent = 'Grid: ' + (showGrid?'on':'off'); renderPlan(); };
+$('labour').oninput = () => { if(plan){ updateBOQ(); updateMetrics(); } };
+$('prompt').addEventListener('keydown', e => { if((e.ctrlKey||e.metaKey)&&e.key==='Enter') generateFromPrompt(); });
 
-$('dims').onclick=()=>{showDims=!showDims;$('dims').textContent='Dimensions: '+(showDims?'on':'off');render2D()};
-$('grid').onclick=()=>{showGrid=!showGrid;$('grid').textContent='Grid: '+(showGrid?'on':'off');render2D()};
-$('labour').oninput=()=>{if(plan){updateBOQ();updateMetrics()}};
-$('prompt').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')generate()});
-
-generate();
+generateFromSettings();
 detectLocationAndCurrency();
 })();
 </script>
